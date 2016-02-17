@@ -4,7 +4,10 @@
   "description": "DaVinci College Game Tournament site",
   "main": "app.js",
   "dependencies": {
-    "express": "^4.13.4"
+    "express": "^4.13.4",
+    "mongoose": "^4.4.3",
+    "nodemailer": "^2.1.0",
+    "socket.io": "^1.4.5"
   },
   "devDependencies": {},
   "scripts": {
