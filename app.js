@@ -3,10 +3,12 @@
 const express = require('express');
 const app = express();
 
+const config = require('./config');
+
 app.get('/', function(req, res) {
 	res.send('Hello World!');
 });
 
-app.listen(process.env.PORT || 1337, function() {
-	console.log('Server is running!');
+app.listen(config.port, function() {
+	console.log('Server is running on port ' + config.port);
 });
