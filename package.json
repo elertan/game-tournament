@@ -4,6 +4,7 @@
   "description": "DaVinci College Game Tournament site",
   "main": "app.js",
   "dependencies": {
+    "body-parser": "^1.15.0",
     "express": "^4.13.4",
     "jade": "^1.11.0",
     "mongoose": "^4.4.3",
