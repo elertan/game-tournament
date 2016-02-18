@@ -8,6 +8,7 @@ const config = require('./config');
 
 const app = express();
 
+mongoose.connect(config.database.url);
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // Routes
