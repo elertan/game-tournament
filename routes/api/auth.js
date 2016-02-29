@@ -18,7 +18,6 @@ router.post('/register', paramCheck(['email', 'password']), function (req, res) 
 		
 		res.json({ user: user });
 	});
-	res.end();
 });
 
 module.exports = router;
