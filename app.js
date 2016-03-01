@@ -13,8 +13,9 @@ mongoose.connect(config.database.url);
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // Authentication
-app.use(passport.initialize());
-passport.use(require('./passport-strategies/jwt'));
+// Currently using express-jwt, so this is not used at the moment
+// app.use(passport.initialize());
+// passport.use(require('./passport-strategies/jwt'));
 
 // Routes
 app.use(require('./routes/main'));
