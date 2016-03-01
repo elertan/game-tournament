@@ -9,10 +9,7 @@ const schema = new Schema({
 	password: String,
 	firstname: String,
 	lastname: String,
-	priveleges: {
-		type: String,
-		default: 'user'
-	},
+	priveleges: [String],
 	updated_at: Date,
 	created_at: Date
 });
@@ -23,10 +20,10 @@ schema.methods.validPassword = function (password, cb) {
 	});
 };
 
-// Test code
 schema.pre('save', function (next) {
 	if (!this.created_at) {
 		this.created_at = new Date();
+		this.priveleges = ['user']; 
 	}
 	
 	this.updated_at = new Date();

@@ -9,8 +9,11 @@ const config = require('./config');
 
 const app = express();
 
-mongoose.connect(config.database.url);
+app.set('views', __dirname + '/views');
+app.set('view engine', 'jade');
 app.use(bodyParser.urlencoded({ extended: false }));
+
+mongoose.connect(config.database.url);
 
 // Authentication
 // Currently using express-jwt, so this is not used at the moment

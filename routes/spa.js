@@ -3,7 +3,8 @@
 const express = require('express');
 const router = express.Router();
 
-router.use('/user', require('./api/user'));
-router.use('/auth', require('./api/auth'));
+router.get('/index', function (req, res) {
+	res.render('spa/index');
+});
 
 module.exports = router;
