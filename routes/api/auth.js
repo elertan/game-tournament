@@ -56,9 +56,4 @@ router.post('/register', paramCheck(['email', 'password']), function (req, res) 
 	});
 });
 
-const expressJwt = require('express-jwt');
-router.get('/test', expressJwt({ secret: config.secret }), function (req, res) {
-	res.json(req.user._doc);
-});
-
 module.exports = router;
