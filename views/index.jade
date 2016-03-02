@@ -1,10 +1,11 @@
 html
 	head
 		link(rel="stylesheet", href="/public/bootstrap/dist/css/bootstrap.min.css")
-	body
+	body(ng-app="app")
 		div(ui-view="")
 		script(src="/public/jquery/dist/jquery.min.js")
 		script(src="/public/bootstrap/dist/js/bootstrap.min.js")
 		script(src="/public/angular/angular.js")
 		script(src="/public/angular-resource/angular-resource.js")
 		script(src="/public/angular-ui-router/release/angular-ui-router.js")
+		script(src="/public/js/frontend.js")
