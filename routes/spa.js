@@ -9,4 +9,8 @@ router.get('/index', function (req, res) {
 	res.render('spa/index');
 });
 
+router.get('/about', function (req, res) {
+	res.render('spa/about');
+});
+
 module.exports = router;

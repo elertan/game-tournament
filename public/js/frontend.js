@@ -10,12 +10,12 @@ app.config(function ($stateProvider, $urlRouterProvider) {
 			url: '/',
 			templateUrl: '/spa/index'
 		})
-		.state('login', {
+		.state('auth/login', {
 			url: '/auth/login',
 			templateUrl: '/spa/auth/login'
 		})
 		.state('about', {
 			url: '/about',
-			template: '<h1>ABOUT PAGE</h1>'
+			templateUrl: '/spa/about'
 		});
 });

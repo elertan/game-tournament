@@ -1,1 +1,9 @@
-h1 Login webpage
+extends ../main.jade
+
+block content
+	form
+		input.form-control(type="text", placeholder="Email")
+		input.form-control(type="text", placeholder="Password")
+		input.form-control(type="submit", value="Login")
+	
+script(src="/public/js/spa/auth/login.js")
