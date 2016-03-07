@@ -18,6 +18,10 @@ app.config(function ($stateProvider, $urlRouterProvider) {
 			url: '/auth/register',
 			templateUrl: '/spa/auth/register'
 		})
+		.state('auth/register/verify', {
+			url: '/auth/register/:verificationCode',
+			templateUrl: '/spa/auth/register/verify'
+		})
 		.state('about', {
 			url: '/about',
 			templateUrl: '/spa/about'
@@ -51,4 +55,24 @@ app.controller('AuthRegister', ['$scope', '$http', function ($scope, $http) {
 			$scope.msg = data.msg;
 		});	
 	};
+}]);
+
+app.controller('AuthRegisterVerify', ['$scope', '$http', '$stateParams', function ($scope, $http, $stateParams) {
+	var code = $stateParams.verificationCode;
+
+	var request = $http({
+		method: 'GET',
+		url: '/spa/auth/register/verifyData/' + code,
+	});
+	request.success(function (data) {
+		var reg = data.registration;
+		
+		if (data.err) {
+			$scope.errorMsg = data.err;
+			
+			return;
+		}
+
+		$scope.studentnumber = reg.studentnumber;
+	});
 }]);

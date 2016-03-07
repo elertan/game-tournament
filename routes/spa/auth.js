@@ -10,6 +10,11 @@ const randomstring = require('randomstring');
 const User = require('../../models/user.js');
 const Registration = require('../../models/registration.js');
 
+const transporter = nodemailer.createTransport({
+	host: 'localhost',
+	port: 9998
+});
+
 // Add routes here
 router.get('/login', function (req, res) {
 	res.render('spa/auth/login');
@@ -37,42 +42,62 @@ router.post('/register', function (req, res) {
 
 	Registration.findOne({ studentnumber: studentnumber }, function (err, registration) {
 		if (registration) {
+			res.json({ err: 'Er is al een email gestuurd naar dit studentnummer' });
 			return;
 		}
 		
-		const data = {
-			from: 'info@gametournament.nl',
-			to: email,
-			subject: 'Account Activatie',
-			text: 'Beste Leerling,\n\nDruk op deze link om jouw account aan te maken http://localhost:1337/#/auth/register/Adu342hda8asdm\n\nMet vriendelijke groet,\n\nHet game tournament team'
-		};
-		
-		const transporter = nodemailer.createTransport({
-			host: 'localhost',
-			port: 9998
+		const code = randomstring.generate();
+				
+		const reg = new Registration({
+			studentnumber: studentnumber,
+			verificationCode: code
 		});
 		
-		transporter.sendMail(data, function (err, info) {
-			if (!err) {
-				const code = randomstring.generate();
-				
-				const registration = new Registration({
-					studentnumber: studentnumber,
-					verificationCode: code
-				});
-				
-				res.json({ msg: 'Er is een email naar ' + email + ' gestuurd.' });
-			} else {
-				res.json({ err: 'Er is een fout opgetreden, probeer het later overnieuw.' });
+		reg.save(function (err, saveResult) {
+			if (err) {
+				res.json({ err: 'Interne server fout' });
 			}
+			const data = {
+				from: 'info@gametournament.nl',
+				to: email,
+				subject: 'Account Activatie',
+				text: 'Beste Leerling,\n\nDruk op deze link om jouw account aan te maken http://localhost:1337/#/auth/register/' + code + '\n\nMet vriendelijke groet,\n\nHet game tournament team'
+			};
+			
+			transporter.sendMail(data, function (err, info) {
+				if (!err) {
+					res.json({ msg: 'Er is een email naar ' + email + ' gestuurd.' });
+				} else {
+					res.json({ err: 'Er is een fout opgetreden, probeer het later overnieuw.' });
+				}
+			});
 		});
 	});
 });
 
-router.get('/register/:verificationCode', function (req, res) {
+router.get('/register/verify', function (req, res) {
+	res.render('spa/auth/register/verify');
+});
+
+router.get('/register/verifyData/:verificationCode', function (req, res) {
 	const code = req.params.verificationCode;
-	
-	
+	Registration.findOne({ verificationCode: code }, function (err, registration) {
+		if (err) {
+			res.json({
+				err: 'Er is een fout opgetreden, probeer het later opnieuw'
+			});
+			return;
+		}
+		if (!registration) {
+			res.json({
+				err: 'Onjuiste verificatie code'
+			});
+			return;
+		}
+		res.json({
+			registration: registration
+		});
+	});
 });
 
 module.exports = router;

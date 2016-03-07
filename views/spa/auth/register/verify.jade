@@ -1,0 +1,11 @@
+extends ../../main.jade
+
+block content
+	div(ng-controller="AuthRegisterVerify")
+		h3(style="color: red") {{ errorMsg }}
+		h3(style="color: #00DD00") {{ msg }}
+		form#loginform.col-md-offset-3.col-md-6(ng-show="!errorMsg", style="margin-top: 20px;")
+			input.form-control(type="text", placeholder="Leerling Nummer", ng-model="studentnumber", disabled="")
+			input.form-control(type="text", placeholder="Voornaam", ng-model="firstname")
+			input.form-control(type="text", placeholder="Achternaam", ng-model="password")
+			button.btn.btn-default(ng-click="processForm()", style="width: 100%; margin-top: 20px;") Registreer
