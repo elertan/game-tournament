@@ -1,9 +1,9 @@
 extends ../main.jade
 
 block content
-	form
-		input.form-control(type="text", placeholder="Email")
+	form#registerform.col-md-offset-3.col-md-6(style="margin-top: 20px;")
+		input.form-control(style="margin-bottom: 5px;" type="text", placeholder="Email")
 		input.form-control(type="text", placeholder="Password")
-		input.form-control(type="submit", value="Login")
+		input.form-control(style="margin-top: 15px;" type="submit", value="Login")
 	
 script(src="/public/js/spa/auth/login.js")
