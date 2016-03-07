@@ -3,6 +3,8 @@
 const express = require('express');
 const router = express.Router();
 
+const mailgun = require('mailgun-js')({ apiKey: 'key-95c69f24df3cf38a009998e4dcc8bb24', domain: 'sandbox18d026f44d7d4065b80d49564681004e.mailgun.org' });
+
 // Add routes here
 router.get('/login', function (req, res) {
 	res.render('spa/auth/login');
@@ -20,38 +22,25 @@ router.post('/register', function (req, res) {
 		return;
 	}
 	
-	if (form.studentnumber.length < 8) {
-		res.json({ err: 'Studentnumber must contain 8 numbers' });
+	if (form.studentnumber.length != 8) {
+		res.json({ err: 'Studentnumber must have 8 numbers' });
 		return;
 	}
-	
-	var nodemailer = require('nodemailer');
-	var smtpTransport = require('nodemailer-smtp-transport');
 
-	var transporter = nodemailer.createTransport(smtpTransport({
-		host: 'localhost',
-		port: 25,
-		// auth: {
-		// 	user: 'info@gametournament.nl',
-		// 	pass: ''
-		// }
-	}));
+	const data = {
+		from: 'info@gametournament.nl',
+		to: form.studentnumber + '@mydavinci.nl',
+		subject: 'Account Activatie',
+		text: 'Beste Leerling,\n\nDruk op deze link om jouw account aan te maken http://localhost:1337/#/auth/register/Adu342hda8asdm\n\nMet vriendelijke groet,\n\nHet game tournament team'
+	};
 	
-	// send mail
-	transporter.sendMail({
-		from: 'denkievits@gmail.com',
-		to: 'patrickvonk@hotmail.com',
-		subject: 'hello playground!',
-		text: 'Authenticated with OAuth2'
-	}, function(error, response) {
-	if (error) {
-			console.log(error);
-	} else {
-			console.log('Message sent');
-	}
+	mailgun.messages().send(data, function (err, body) {
+		if (!err) {
+			res.json({ msg: 'suc6' });
+		} else {
+			res.json({ err: 'er!!!' });
+		}
 	});
-	
-	res.json({ msg: 'An email has been send to ' + form.studentnumber + '@mydavinci.nl' });
 });
 
 module.exports = router;
