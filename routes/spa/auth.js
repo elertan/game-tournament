@@ -150,8 +150,24 @@ router.post('/register/verify', function (req, res) {
 			localUser.lastname = form.lastname;
 			localUser.studentnumber = parseInt(form.studentnumber);
 
-			localUser.save(function (err) {
-				res.json({ stateChange: 'auth/login' });
+			request.post({
+				url: 'http://localhost:1337/api/auth/login',
+				form: {
+					email: form.studentnumber + '@mydavinci.nl',
+					password: form.password
+				}
+			}, function (err, httpRes, body) {
+				const data = JSON.parse(body);
+				
+				if (data.err) {
+					// Handle error
+					return;
+				}
+				localUser.jwt = data.token;
+				
+				localUser.save(function (err) {
+					res.json({ stateChange: 'auth/login' });
+				});
 			});
 		});
 	});
