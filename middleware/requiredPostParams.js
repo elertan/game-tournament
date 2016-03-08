@@ -9,7 +9,6 @@ module.exports = function (params) {
 		}		
 		if (success) {
 			next();
-			console.log('Parameters correct');
 		}
 	};
 };

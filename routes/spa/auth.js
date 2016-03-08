@@ -6,13 +6,15 @@ const router = express.Router();
 //const mailgun = require('mailgun-js')({ apiKey: 'key-95c69f24df3cf38a009998e4dcc8bb24', domain: 'sandbox18d026f44d7d4065b80d49564681004e.mailgun.org' });
 const nodemailer = require('nodemailer');
 const randomstring = require('randomstring');
+const request = require('request');
 
 const User = require('../../models/user.js');
+const LocalUser = require('../../models/local/user.js');
 const Registration = require('../../models/registration.js');
 
 const transporter = nodemailer.createTransport({
 	host: 'localhost',
-	port: 9998
+	port: 9001
 });
 
 // Add routes here
@@ -96,6 +98,61 @@ router.get('/register/verifyData/:verificationCode', function (req, res) {
 		}
 		res.json({
 			registration: registration
+		});
+	});
+});
+
+router.post('/register/verify', function (req, res) {
+	const form = req.body;
+
+	if (form.password != form.repassword) {
+		res.json({ err: 'Wachtwoorden komen niet overeen' });
+		return;
+	}
+
+	Registration.findOne({ studentnumber: form.studentnumber }, function (err, registration) {
+		if (err) {
+			res.json({
+				err: 'Er is een fout opgetreden, probeer het later opnieuw'
+			});
+			return;
+		}
+		if (!registration) {
+			res.json({
+				err: 'Er bestaat geen registratie voor dit studentnummer'
+			});
+			return;
+		}
+		if (registration.verificationCode != form.verificationCode) {
+			res.json({
+				err: 'Nice try bitch'
+			});
+			return;
+		}
+
+		registration.remove();
+
+		request.post({
+			url: 'http://localhost:1337/api/auth/register',
+			form: {
+				email: form.studentnumber + '@mydavinci.nl',
+				password: form.password
+			}
+		}, function (err, httpRes, body) {
+			const data = JSON.parse(body);
+			if (data.err) {
+				res.json({ err: data.err });
+				return;
+			}
+
+			const localUser = new LocalUser(data.user);
+			localUser.firstname = form.firstname;
+			localUser.lastname = form.lastname;
+			localUser.studentnumber = parseInt(form.studentnumber);
+
+			localUser.save(function (err) {
+				res.json({ stateChange: 'auth/login' });
+			});
 		});
 	});
 });

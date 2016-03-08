@@ -5,8 +5,10 @@ const bcrypt = require('bcrypt');
 const Schema = mongoose.Schema;
 
 const schema = new Schema({
-	email: String,
+	studentnumber: Number,
 	password: String,
+	firstname: String,
+	lastname: String,
 	priveleges: [String],
 	updated_at: Date,
 	created_at: Date
@@ -33,4 +35,4 @@ schema.pre('update', function (next) {
 	next();
 });
 
-module.exports = mongoose.model('User', schema);
+module.exports = mongoose.model('LocalUser', schema);

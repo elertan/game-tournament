@@ -57,7 +57,7 @@ app.controller('AuthRegister', ['$scope', '$http', function ($scope, $http) {
 	};
 }]);
 
-app.controller('AuthRegisterVerify', ['$scope', '$http', '$stateParams', function ($scope, $http, $stateParams) {
+app.controller('AuthRegisterVerify', ['$scope', '$http', '$stateParams', '$state', function ($scope, $http, $stateParams, $state) {
 	var code = $stateParams.verificationCode;
 
 	var request = $http({
@@ -69,10 +69,45 @@ app.controller('AuthRegisterVerify', ['$scope', '$http', '$stateParams', functio
 		
 		if (data.err) {
 			$scope.errorMsg = data.err;
-			
+			$scope.error = true;
 			return;
 		}
 
 		$scope.studentnumber = reg.studentnumber;
 	});
+
+	$scope.processForm = function () {
+		$scope.errorMsg = '';
+		$scope.msg = '';
+
+		if ($scope.password != $scope.repassword) {
+			$scope.errorMsg = 'Wachtwoorden komen niet overeen';
+			return;
+		}
+
+		$http({
+			method: 'POST',
+			url: '/spa/auth/register/verify',
+			data: $.param({
+				studentnumber: $scope.studentnumber,
+				verificationCode: code,
+				firstname: $scope.firstname,
+				lastname: $scope.lastname,
+				password: $scope.password,
+				repassword: $scope.repassword
+			}),
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			}
+		}).success(function (data) {
+			if (data.err) {
+				return;
+			}
+
+			if (data.stateChange) {
+				$state.go(data.stateChange);
+				console.log('changed! I guess');
+			}
+		});
+	};
 }]);
