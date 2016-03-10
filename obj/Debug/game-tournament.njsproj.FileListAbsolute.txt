@@ -1,0 +1,2 @@
+\\Mac\AllFiles\Users\elertan\Projects\Node\game-tournament\obj\Debug\game-tournament.njsprojResolveAssemblyReference.cache
+\\Mac\AllFiles\Users\elertan\Projects\Node\game-tournament\bin\Microsoft.NodejsTools.WebRole.dll

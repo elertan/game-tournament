@@ -165,6 +165,7 @@ router.post('/register/verify', function (req, res) {
 				}
 				localUser.jwt = data.token;
 				
+				
 				localUser.save(function (err) {
 					res.json({ stateChange: 'auth/login' });
 				});
