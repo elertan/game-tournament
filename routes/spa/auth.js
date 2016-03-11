@@ -12,6 +12,9 @@ const User = require('../../models/user.js');
 const LocalUser = require('../../models/local/user.js');
 const Registration = require('../../models/registration.js');
 
+const config = require('../../config');
+const jwt = require('jsonwebtoken');
+
 const transporter = nodemailer.createTransport({
 	host: 'localhost',
 	port: 9001
@@ -20,6 +23,42 @@ const transporter = nodemailer.createTransport({
 // Add routes here
 router.get('/login', function (req, res) {
 	res.render('spa/auth/login');
+});
+
+router.post('/login', function (req, res) {
+	const form = req.body;
+	
+	const password = form.password;
+	const studentNumber = form.studentnumber;
+	
+	if (isNaN(studentNumber)) {
+		res.json({ err: 'Student nummer moet een getal zijn' });
+		return;
+	}
+	
+	if (studentNumber.length != 8) {
+		res.json({ err: 'Studentnummer moet 8 getallen zijn' });
+		return;
+	}
+	
+	LocalUser.findOne({studentnumber: studentNumber}, function (err, user) {
+		if (!user) {
+			res.json({err: 'Gebruiker niet gevonden'});
+			return;
+		}
+		
+		user.validPassword(password, function (same) {
+			if (!same) {
+				res.json({ err: 'verkeerd wachtwoord' });
+				return;
+			}
+			
+			const token = jwt.sign(user, config.secret, { expiresIn: config.auth.expirationTime.toString() });
+			
+			res.json({token: token, user: user});
+		});
+		
+	});
 });
 
 router.get('/register', function (req, res) {

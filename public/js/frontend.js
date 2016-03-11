@@ -32,6 +32,30 @@ app.controller('Main', ['$scope', function ($scope) {
 	
 }]);
 
+app.controller('AuthLogin', ['$scope', '$http', function ($scope, $http) {
+	$scope.processForm = function () {
+		var request = $http({
+			method: 'POST',
+			url: '/spa/auth/login',
+			data: $.param({
+				studentnumber: $scope.studentNumber,
+				password: $scope.password
+			}),
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			}
+		});
+		request.success(function (data) {
+			if (data.err) {
+				$scope.errorMsg = data.err;
+				return;
+			}
+			
+			window.localStorage.jwt = data.token;
+		});	
+	};
+}]);
+
 app.controller('AuthRegister', ['$scope', '$http', function ($scope, $http) {
 	$scope.processForm = function () {
 		$scope.errorMsg = '';
