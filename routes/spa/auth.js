@@ -13,6 +13,7 @@ const Registration = require('../../models/registration.js');
 
 const config = require('../../config');
 const jwt = require('jsonwebtoken');
+const requiredPostParams = require('../../middleware/requiredPostParams.js');
 
 const transporter = nodemailer.createTransport({
 	host: 'localhost',
@@ -24,7 +25,7 @@ router.get('/login', function (req, res) {
 	res.render('spa/auth/login');
 });
 
-router.post('/login', function (req, res) {
+router.post('/login', requiredPostParams(['password', 'studentnumber']), function (req, res) {
 	const form = req.body;
 	
 	const password = form.password;
@@ -64,7 +65,7 @@ router.get('/register', function (req, res) {
 	res.render('spa/auth/register');
 });
 
-router.post('/register', function (req, res) {
+router.post('/register', requiredPostParams(['studentnumber']), function (req, res) {
 	const form = req.body;
 	
 	if (isNaN(form.studentnumber)) {
@@ -115,6 +116,14 @@ router.post('/register', function (req, res) {
 	});
 });
 
+router.get('/forgotPassword', function (req, res) { 
+	res.render('spa/auth/forgotPassword');
+});
+
+router.post('/forgotPassword', requiredPostParams(['studentNumber']), function (req, res) {
+	
+});
+
 router.get('/register/verify', function (req, res) {
 	res.render('spa/auth/register/verify');
 });
@@ -140,7 +149,7 @@ router.get('/register/verifyData/:verificationCode', function (req, res) {
 	});
 });
 
-router.post('/register/verify', function (req, res) {
+router.post('/register/verify', requiredPostParams(['password', 'repassword', 'firstname', 'lastname', 'verificationCode', 'studentnumber']), function (req, res) {
 	const form = req.body;
 
 	if (form.password != form.repassword) {

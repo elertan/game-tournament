@@ -21,6 +21,10 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInter
 			url: '/auth/login',
 			templateUrl: '/spa/auth/login'
 		})
+		.state('auth/forgotPassword', {
+			url: '/auth/forgotPassword',
+			templateUrl: '/spa/auth/forgotPassword'
+		})
 		.state('auth/register', {
 			url: '/auth/register',
 			templateUrl: '/spa/auth/register'
@@ -39,7 +43,16 @@ app.controller('Main', ['$scope', function ($scope) {
 	
 }]);
 
-app.controller('AuthLogin', ['$scope', '$http', function ($scope, $http) {
+app.controller('AuthLogin', ['$scope', '$http', '$state', function ($scope, $http, $state) {
+		
+	if (window.localStorage.jwt) {
+			$state.go('index');
+		}
+		
+	$scope.forgotPassword = function () {
+			$state.go('auth/forgotPassword');
+	};
+			
 	$scope.processForm = function () {
 		var request = $http({
 			method: 'POST',
@@ -58,12 +71,18 @@ app.controller('AuthLogin', ['$scope', '$http', function ($scope, $http) {
 				return;
 			}
 			
-			window.localStorage.jwt = data.token;
+                window.localStorage.jwt = data.token;
+				$state.go('index');
 		});	
 	};
 }]);
 
-app.controller('AuthRegister', ['$scope', '$http', function ($scope, $http) {
+app.controller('AuthRegister', ['$scope', '$http', '$state', function ($scope, $http, $state) {
+		
+	if (window.localStorage.jwt) {
+		$state.go('index');
+	}
+
 	$scope.processForm = function () {
 		$scope.errorMsg = '';
 		$scope.msg = '';
@@ -85,6 +104,23 @@ app.controller('AuthRegister', ['$scope', '$http', function ($scope, $http) {
 			}
 			$scope.msg = data.msg;
 		});	
+	};
+}]);
+
+app.controller('AuthForgotPassword', ['$scope', '$http', '$state', function ($scope, $http, $state) {
+	$scope.processForm = function () {
+		var studentNumber = $scope.studentNumber;
+
+		var request = $http({
+			method: 'POST',
+			url: '/spa/auth/forgotPassword/',
+			data: $.param({
+				studentNumber: studentNumber
+			}),
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			}
+		});
 	};
 }]);
 

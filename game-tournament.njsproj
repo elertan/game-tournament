@@ -240,6 +240,7 @@
     <TypeScriptCompile Include="typings\node\node.d.ts" />
     <TypeScriptCompile Include="typings\passport\passport.d.ts" />
     <Content Include="views\spa\about.jade" />
+    <Content Include="views\spa\auth\forgotPassword.jade" />
     <Content Include="views\spa\index.jade" />
     <Content Include="views\spa\main.jade" />
     <Content Include="views\spa\auth\login.jade" />

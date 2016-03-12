@@ -8,7 +8,7 @@ router.use('/public', express.static(__dirname + '/../public'));
 router.use('/api', require('./api'));
 router.use('/spa', require('./spa'));
 
-router.get('/', function(req, res) {
+router.get('/', function (req, res) {
 	// SPA
 	res.render('index');
 });
