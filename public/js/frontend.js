@@ -1,8 +1,15 @@
-var app = angular.module('app', ['ui.router']);
+var app = angular.module('app', ['ui.router', 'angular-jwt']);
 
 var loadedScripts = [];
 
-app.config(function ($stateProvider, $urlRouterProvider) {
+app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInterceptorProvider) {
+
+	jwtInterceptorProvider.tokenGetter = function () {
+		return window.localStorage.getItem('jwt');
+	};
+	
+	$httpProvider.interceptors.push('jwtInterceptor');
+
 	$urlRouterProvider.otherwise('/');
 
 	$stateProvider

@@ -14,7 +14,6 @@ app.set('view engine', 'jade');
 app.use(bodyParser.urlencoded({ extended: false }));
 
 mongoose.connect(config.database.url);
-
 // Authentication
 // Currently using express-jwt, so this is not used at the moment
 // app.use(passport.initialize());

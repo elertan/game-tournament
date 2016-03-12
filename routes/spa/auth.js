@@ -3,7 +3,6 @@
 const express = require('express');
 const router = express.Router();
 
-//const mailgun = require('mailgun-js')({ apiKey: 'key-95c69f24df3cf38a009998e4dcc8bb24', domain: 'sandbox18d026f44d7d4065b80d49564681004e.mailgun.org' });
 const nodemailer = require('nodemailer');
 const randomstring = require('randomstring');
 const request = require('request');
