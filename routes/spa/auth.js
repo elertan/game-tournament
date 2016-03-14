@@ -9,7 +9,8 @@ const request = require('request');
 
 const User = require('../../models/user.js');
 const LocalUser = require('../../models/local/user.js');
-const Registration = require('../../models/registration.js');
+const Registration = require('../../models/local/registration.js');
+const PasswordReset = require('../../models/local/password-reset.js');
 
 const config = require('../../config');
 const jwt = require('jsonwebtoken');
@@ -121,7 +122,89 @@ router.get('/forgotPassword', function (req, res) {
 });
 
 router.post('/forgotPassword', requiredPostParams(['studentNumber']), function (req, res) {
-	
+	const form = req.body;
+
+	const password = form.password;
+	const studentNumber = form.studentNumber;
+
+	if (isNaN(studentNumber)) {
+		res.json({ err: 'Studentnummer moet een getal zijn' });
+		return;
+	}
+
+	if (studentNumber.length != 8) {
+		res.json({ err: 'Studentnummer moet 8 getallen zijn' });
+		return;
+	}
+
+	LocalUser.findOne({ studentnumber: studentNumber }, function (err, user) {
+		if (!user) {
+			res.json({ err: 'Deze student heeft nog geen account geregistreerd' });
+			return;
+		}
+
+		PasswordReset.findOne({ studentnumber: studentNumber }, function (err, passwordReset) {
+			if (err) {
+				return;
+			}
+			if (passwordReset) {
+				res.json({ err: 'Deze student heeft al een wachtwoord reset aangevraagd' });
+				return;
+			}
+
+			const code = randomstring.generate();
+
+			const passReset = new PasswordReset({
+				verificationCode: code,
+				studentnumber: studentNumber
+			});
+
+			passReset.save();
+
+			const email = studentNumber + '@mydavinci.nl';
+
+			const data = {
+				from: 'info@gametournament.nl',
+				to: email,
+				subject: 'Wachtwoord Vergeten',
+				text: 'Beste Leerling,\n\nDruk op deze link om jouw wachtwoord te resetten http://localhost:1337/#/auth/forgotPassword/' + code + '\n\nMet vriendelijke groet,\n\nHet game tournament team'
+			};
+
+			transporter.sendMail(data, function (err, info) {
+				if (!err) {
+					res.json({ msg: 'Er is een email naar ' + email + ' gestuurd.' });
+				} else {
+					res.json({ err: 'Er is een fout opgetreden, probeer het later overnieuw.' });
+				}
+			});
+
+		});
+	});
+});
+
+router.get('/forgotPassword/verify', function (req, res) {
+	res.render('spa/auth/forgotPassword/verify');
+});
+
+router.get('/forgotPasswordData/:verificationCode', function (req, res) {
+	const code = req.params.verificationCode;
+	PasswordReset.findOne({ verificationCode: code }, function (err, passReset) {
+		if (err) {
+			res.json({
+				err: 'Er is een fout opgetreden, probeer het later opnieuw'
+			});
+			return;
+		}
+		if (!passReset) {
+			res.json({
+				err: 'Onjuiste verificatie code'
+			});
+			return;
+		}
+		res.json({
+			passwordReset: passReset
+		});
+	});
 });
 
 router.get('/register/verify', function (req, res) {
@@ -145,6 +228,61 @@ router.get('/register/verifyData/:verificationCode', function (req, res) {
 		}
 		res.json({
 			registration: registration
+		});
+	});
+});
+
+router.post('/forgotPassword/verify', requiredPostParams(['password', 'repassword', 'verificationCode', 'studentnumber']), function (req, res) {
+	const form = req.body;
+
+	if (form.password != form.repassword) {
+		res.json({ err: 'Wachtwoorden komen niet overeen' });
+		return;
+	}
+
+	PasswordReset.findOne({ studentnumber: form.studentnumber }, function (err, passwordReset) {
+		if (err) {
+			res.json({
+				err: 'Er is een fout opgetreden, probeer het later opnieuw'
+			});
+			return;
+		}
+		if (!passwordReset) {
+			res.json({
+				err: 'Er bestaat geen reset voor dit studentnummer'
+			});
+			return;
+		}
+		if (passwordReset.verificationCode != form.verificationCode) {
+			res.json({
+				err: 'Nice try bitch'
+			});
+			return;
+		}
+
+		LocalUser.findOne({ studentnumber: form.studentnumber }, function (err, localUser) {
+			passwordReset.remove();
+
+			request.post({
+				url: 'http://localhost:1337/api/auth/changePassword',
+				form: {
+					email: form.studentnumber + '@mydavinci.nl',
+					password: form.password,
+					oldpassword: localUser.password
+				}
+			}, function (err, httpRes, body) {
+				const data = JSON.parse(body);
+				if (data.err) {
+					res.json({ err: data.err });
+					return;
+				}
+
+				if (data.success) {
+					localUser.password = data.password;
+					localUser.save();
+					res.json({ msg: 'Wachtwoord gereset' });
+				}
+			});
 		});
 	});
 });

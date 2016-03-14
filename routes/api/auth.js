@@ -56,4 +56,29 @@ router.post('/register', paramCheck(['email', 'password']), function (req, res) 
 	});
 });
 
+router.post('/changePassword', paramCheck(['email', 'oldpassword', 'password']), function (req, res) {
+	User.findOne({ email: req.body.email }, function (err, user) {
+		if (err) {
+			return;
+		}
+		if (!user) {
+			res.json({ err: 'User not found' });
+			return;
+		}
+
+		if (user.password != req.body.oldpassword) {
+			res.json({ err: 'Invalid password' });
+			return;
+		}
+
+		bcrypt.genSalt(10, function (err, salt) {
+			bcrypt.hash(req.body.password, salt, function (err, hash) {
+				user.password = hash;
+				user.save();
+				res.json({ success: true, password: hash });
+			});
+		});
+	});
+});
+
 module.exports = router;

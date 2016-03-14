@@ -29,8 +29,9 @@
     <Compile Include="middleware\isAuth.js" />
     <Compile Include="middleware\requiredPostParams.js" />
     <Compile Include="middleware\userHasPriveleges.js" />
-    <Compile Include="models\message.js" />
-    <Compile Include="models\registration.js" />
+    <Compile Include="models\local\message.js" />
+    <Compile Include="models\local\password-reset.js" />
+    <Compile Include="models\local\registration.js" />
     <Compile Include="models\user.js" />
     <Compile Include="passport-strategies\jwt.js" />
     <Compile Include="routes\api.js" />
@@ -241,6 +242,7 @@
     <TypeScriptCompile Include="typings\passport\passport.d.ts" />
     <Content Include="views\spa\about.jade" />
     <Content Include="views\spa\auth\forgotPassword.jade" />
+    <Content Include="views\spa\auth\forgotPassword\verify.jade" />
     <Content Include="views\spa\index.jade" />
     <Content Include="views\spa\main.jade" />
     <Content Include="views\spa\auth\login.jade" />
@@ -312,6 +314,7 @@
     <Folder Include="views" />
     <Folder Include="views\spa" />
     <Folder Include="views\spa\auth" />
+    <Folder Include="views\spa\auth\forgotPassword\" />
     <Folder Include="views\spa\auth\register" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />

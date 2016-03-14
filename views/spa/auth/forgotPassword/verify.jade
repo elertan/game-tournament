@@ -1,0 +1,12 @@
+﻿extends ../../main.jade
+
+block content
+	div(ng-controller="AuthForgotPasswordVerify")
+		h3(style="color: red") {{ errorMsg }}
+		h3(style="color: #00DD00") {{ msg }}
+		form#loginform.col-md-offset-3.col-md-6(ng-show="!error", style="margin-top: 20px;")
+			input.form-control(type="text", placeholder="Leerling Nummer", ng-model="studentnumber", disabled="")
+			div(style="padding-top: 10px;")
+			input.form-control(type="password", placeholder="Wachtwoord", ng-model="password")
+			input.form-control(type="password", placeholder="Wachtwoord Overnieuw", ng-model="repassword")
+			button.btn.btn-default(ng-click="processForm()", style="width: 100%; margin-top: 20px;") Reset Wachtwoord
