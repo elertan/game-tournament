@@ -29,7 +29,7 @@ router.post('/login', requiredPostParams(['password', 'studentnumber']), functio
 	const form = req.body;
 	
 	const password = form.password;
-	const studentNumber = form.studentnumber;
+    const studentNumber = form.studentnumber;
 	
 	if (isNaN(studentNumber)) {
 		res.json({ err: 'Student nummer moet een getal zijn' });
