@@ -14,38 +14,47 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInter
 	
 	$stateProvider
 		.state('index', {
-		url: '/',
-		templateUrl: '/spa/index'
-	})
+			url: '/',
+			templateUrl: '/spa/index'
+		})
 		.state('auth/login', {
-		url: '/auth/login',
-		templateUrl: '/spa/auth/login'
-	})
+			url: '/auth/login',
+			templateUrl: '/spa/auth/login'
+		})
 		.state('auth/forgotPassword', {
-		url: '/auth/forgotPassword',
-		templateUrl: '/spa/auth/forgotPassword'
-	})
+			url: '/auth/forgotPassword',
+			templateUrl: '/spa/auth/forgotPassword'
+		})
 		.state('auth/forgotPassword/verify', {
-		url: '/auth/forgotPassword/:verificationCode',
+			url: '/auth/forgotPassword/:verificationCode',
 			templateUrl: '/spa/auth/forgotPassword/verify'
-	})
+		})
 		.state('auth/register', {
-		url: '/auth/register',
-		templateUrl: '/spa/auth/register'
-	})
+			url: '/auth/register',
+			templateUrl: '/spa/auth/register'
+		})
 		.state('auth/register/verify', {
-		url: '/auth/register/:verificationCode',
-		templateUrl: '/spa/auth/register/verify'
-	})
-		.state('about', {
-		url: '/about',
-		templateUrl: '/spa/about'
-	});
+			url: '/auth/register/:verificationCode',
+			templateUrl: '/spa/auth/register/verify'
+		});
+		// .state('about', {
+		// 	url: '/about',
+		// 	templateUrl: '/spa/about'
+		// });
 });
 
 app.controller('Main', ['$scope', function ($scope) {
+	if (localStorage.getItem('jwt') != null) {
+		$scope.loggedIn = true;
+		$scope.user = JSON.parse(localStorage.user);
+	}
 	
-	}]);
+	$scope.logout = function () {
+		localStorage.removeItem('jwt');
+		localStorage.removeItem('user');
+		$scope.loggedIn = false;
+	}
+}]);
 
 app.controller('AuthLogin', ['$scope', '$http', '$state', function ($scope, $http, $state) {
 		
@@ -76,6 +85,7 @@ app.controller('AuthLogin', ['$scope', '$http', '$state', function ($scope, $htt
 				}
 				
 				window.localStorage.jwt = data.token;
+				window.localStorage.user = JSON.stringify(data.user);
 				$state.go('index');
 			});
 		};
@@ -193,6 +203,8 @@ app.controller('AuthForgotPasswordVerify', ['$scope', '$http', '$stateParams', '
 				
 				if (data.stateChange) {
 					$state.go(data.stateChange);
+				} else {
+					$state.go('auth/login');
 				}
 			});
 		};

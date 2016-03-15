@@ -79,39 +79,46 @@ router.post('/register', requiredPostParams(['studentnumber']), function (req, r
 		return;
 	}
 	
-	const email = form.studentnumber + '@mydavinci.nl';
-	const studentnumber = parseInt(form.studentnumber);
-
-	Registration.findOne({ studentnumber: studentnumber }, function (err, registration) {
-		if (registration) {
-			res.json({ err: 'Er is al een email gestuurd naar dit studentnummer' });
+	LocalUser.findOne({ studentnumber: parseInt(form.studentnumber) }, function (err, localUser) {
+		if (localUser) {
+			res.json({ err: 'Deze student is al geregistreerd' });
 			return;
 		}
 		
-		const code = randomstring.generate();
-				
-		const reg = new Registration({
-			studentnumber: studentnumber,
-			verificationCode: code
-		});
-		
-		reg.save(function (err, saveResult) {
-			if (err) {
-				res.json({ err: 'Interne server fout' });
+		const email = form.studentnumber + '@mydavinci.nl';
+		const studentnumber = parseInt(form.studentnumber);
+
+		Registration.findOne({ studentnumber: studentnumber }, function (err, registration) {
+			if (registration) {
+				res.json({ err: 'Er is al een email gestuurd naar dit studentnummer' });
+				return;
 			}
-			const data = {
-				from: 'info@gametournament.nl',
-				to: email,
-				subject: 'Account Activatie',
-				text: 'Beste Leerling,\n\nDruk op deze link om jouw account aan te maken http://localhost:1337/#/auth/register/' + code + '\n\nMet vriendelijke groet,\n\nHet game tournament team'
-			};
 			
-			transporter.sendMail(data, function (err, info) {
-				if (!err) {
-					res.json({ msg: 'Er is een email naar ' + email + ' gestuurd.' });
-				} else {
-					res.json({ err: 'Er is een fout opgetreden, probeer het later overnieuw.' });
+			const code = randomstring.generate();
+					
+			const reg = new Registration({
+				studentnumber: studentnumber,
+				verificationCode: code
+			});
+			
+			reg.save(function (err, saveResult) {
+				if (err) {
+					res.json({ err: 'Interne server fout' });
 				}
+				const data = {
+					from: 'info@gametournament.nl',
+					to: email,
+					subject: 'Account Activatie',
+					text: 'Beste Leerling,\n\nDruk op deze link om jouw account aan te maken http://localhost:1337/#/auth/register/' + code + '\n\nMet vriendelijke groet,\n\nHet game tournament team'
+				};
+				
+				transporter.sendMail(data, function (err, info) {
+					if (!err) {
+						res.json({ msg: 'Er is een email naar ' + email + ' gestuurd.' });
+					} else {
+						res.json({ err: 'Er is een fout opgetreden, probeer het later overnieuw.' });
+					}
+				});
 			});
 		});
 	});
