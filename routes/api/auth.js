@@ -1,7 +1,7 @@
 'use strict';
 
 const express = require('express');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt-nodejs');
 const jwt = require('jsonwebtoken');
 
 const router = express.Router();
@@ -37,8 +37,10 @@ router.post('/register', paramCheck(['email', 'password']), function (req, res) 
 			return;
 		}
 		
+		
+		
 		bcrypt.genSalt(10, function (err, salt) {
-			bcrypt.hash(req.body.password, salt, function (err, hash) {
+			bcrypt.hash(req.body.password, salt, null, function (err, hash) {
 				const user = new User();
 				user.email = req.body.email;
 				user.password = hash;
@@ -72,7 +74,7 @@ router.post('/changePassword', paramCheck(['email', 'oldpassword', 'password']),
 		}
 
 		bcrypt.genSalt(10, function (err, salt) {
-			bcrypt.hash(req.body.password, salt, function (err, hash) {
+			bcrypt.hash(req.body.password, salt, null, function (err, hash) {
 				user.password = hash;
 				user.save();
 				res.json({ success: true, password: hash });
