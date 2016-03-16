@@ -4,6 +4,7 @@ const express = require('express');
 const router = express.Router();
 
 router.use('/auth', require('./spa/auth'));
+router.use('/groups', require('./spa/groups'));
 
 router.get('/index', function (req, res) {
 	res.render('spa/index');

@@ -36,6 +36,10 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInter
 		.state('auth/register/verify', {
 			url: '/auth/register/:verificationCode',
 			templateUrl: '/spa/auth/register/verify'
+		})
+		.state('groups', {
+			url: '/groups',
+			templateUrl: '/spa/groups'
 		});
 		// .state('about', {
 		// 	url: '/about',
@@ -264,3 +268,7 @@ app.controller('AuthRegisterVerify', ['$scope', '$http', '$stateParams', '$state
 			});
 		};
 	}]);
+	
+app.controller('Groups', ['$scope', function ($scope) {
+	
+}]);

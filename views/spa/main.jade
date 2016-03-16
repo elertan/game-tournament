@@ -14,16 +14,23 @@ div(ng-controller="Main")
 						a(ui-sref="index") Home
 					li 
 						a(ui-sref="about") About
+					li
+						a(ui-sref="groups") Groepen
+				ul.nav.navbar-nav(ng-show="loggedIn")
+					// li
+					// 	a(ui-sref="test") Test
 				ul.nav.navbar-nav.navbar-right
 					li(ng-show="!loggedIn")
 						a(ui-sref="auth/login") Login
 					li(ng-show="!loggedIn")
 						a(ui-sref="auth/register") Register
 					li.dropdown-toggle(ng-show="loggedIn")
-						a(href="#", data-toggle="dropdown", role="button", aria-haspopup="true", aria-expanded="false") 
+						a(data-toggle="dropdown", role="button", aria-haspopup="true", aria-expanded="false") 
 							| {{ user.firstname + ' ' + user.lastname }}
 							span.caret
 						ul.dropdown-menu
+							li
+								a(ui-sref="profile") Profiel
 							li
 								a(ng-click="logout()") Logout 
 				
