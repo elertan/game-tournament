@@ -2,12 +2,15 @@
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const User = require('./user');
 
 const schema = new Schema({
-	
+	users: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+	name: String,
+	description: String,
+	created_at: Date,
+	updated_at: Date
 });
-
-schema.methods.test = function () {};
 
 schema.pre('save', function (next) {
 	if (!this.created_at) {

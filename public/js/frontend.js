@@ -1,4 +1,4 @@
-var app = angular.module('app', ['ui.router', 'angular-jwt']);
+var app = angular.module('app', ['ui.router', 'angular-jwt', 'ngResource']);
 
 var loadedScripts = [];
 
@@ -40,6 +40,10 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInter
 		.state('groups', {
 			url: '/groups',
 			templateUrl: '/spa/groups'
+		})
+		.state('groups/create', {
+			url: '/groups/create',
+			templateUrl: '/spa/groups/create'
 		});
 		// .state('about', {
 		// 	url: '/about',
@@ -47,7 +51,11 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInter
 		// });
 });
 
-app.controller('Main', ['$scope', function ($scope) {
+app.factory('Group', function($resource) {
+	return $resource('/spa/groups/resource/:id');
+});
+
+app.controller('Main', ['$scope', '$state', function ($scope, $state) {
 	if (localStorage.getItem('jwt') != null) {
 		$scope.loggedIn = true;
 		$scope.user = JSON.parse(localStorage.user);
@@ -57,6 +65,8 @@ app.controller('Main', ['$scope', function ($scope) {
 		localStorage.removeItem('jwt');
 		localStorage.removeItem('user');
 		$scope.loggedIn = false;
+		
+		$state.go('index');
 	}
 }]);
 
@@ -269,6 +279,29 @@ app.controller('AuthRegisterVerify', ['$scope', '$http', '$stateParams', '$state
 		};
 	}]);
 	
-app.controller('Groups', ['$scope', function ($scope) {
+app.controller('Groups', ['$scope', '$state', 'Group', function ($scope, $state, Group) {
+	$scope.createNew = function () {
+		if (!$scope.loggedIn) {
+			return;
+		}
+		
+		$state.go('groups/create');
+	};
+}]);
+
+app.controller('GroupsCreate', ['$scope', '$state', 'Group', function ($scope, $state, Group) {
+	if (!$scope.loggedIn) {
+		$state.go('auth/login');
+		return;
+	}
 	
+	$scope.processForm = function () {
+		var group = new Group({
+			name: $scope.name,
+			description: $scope.description
+		});
+		group.$save(function () {
+			alert('Group saved');
+		});
+	};
 }]);

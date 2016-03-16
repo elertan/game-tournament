@@ -1,5 +1,6 @@
 extends ../main.jade
 
 block content
-	h1 Groups
-	button.btn.btn-success(ng-show="loggedIn") + Create New
+	div(ng-controller="Groups")
+		h1 Groups
+		button.btn.btn-success(ng-show="loggedIn", ng-click="createNew()") + Create New
