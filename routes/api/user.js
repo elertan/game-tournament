@@ -10,11 +10,11 @@ const config = require('../../config');
 
 const User = require('../../models/user');
 
-router.get('/info', isAuth(), function (req, res) {
+router.get('/info', isAuth, function (req, res) {
 	res.json(req.user._doc);
 });
 
-router.get('/by-email/:email', isAuth(), userHasPriveleges(['admin']), function (req, res) {
+router.get('/by-email/:email', isAuth, userHasPriveleges(['admin']), function (req, res) {
 	User.findOne({ email: req.params.email }, function (err, user) {
 		if (err) {
 			res.json({ err: 'Error has occured' });

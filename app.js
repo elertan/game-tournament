@@ -12,6 +12,7 @@ const app = express();
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 mongoose.connect(config.database.url);
 // Authentication

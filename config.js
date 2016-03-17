@@ -5,7 +5,7 @@ module.exports = {
 	site: 'localhost:1337',
 	secret: 'patrickvonkzijnpauperprochat',
 	auth: {
-		expirationTime: 604800 // 7 Days
+		expirationTime: "7d" // 7 Days
 	},
 	database: {
 		url: 'mongodb://localhost:27017/game-tournament'
