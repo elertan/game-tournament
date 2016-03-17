@@ -10,6 +10,7 @@ const request = require('request');
 const User = require('../../models/user.js');
 const LocalUser = require('../../models/local/user.js');
 const Registration = require('../../models/local/registration.js');
+const BlockedUserLogin = require('../../models/local/blockedUserLogin.js');
 const PasswordReset = require('../../models/local/password-reset.js');
 
 const config = require('../../config');
@@ -26,6 +27,45 @@ router.get('/login', function (req, res) {
 	res.render('spa/auth/login');
 });
 
+function WrongLogin(req) {
+		BlockedUserLogin.findOne({blockedIp: req.connection.remoteAddress}, function (err, blockedUserLogin) {			
+		if(!err)
+		{
+			//This blockedUserLogin doesnt exist yet
+			if (!blockedUserLogin) 
+			{
+				const blockedUserLogin = new BlockedUserLogin({ blockedIp: req.connection.remoteAddress, timesFailed: 1 });
+				blockedUserLogin.save();
+				return;
+			}
+			
+			if (blockedUserLogin.timesFailed < 3)
+			{
+				blockedUserLogin.timesFailed++;
+				blockedUserLogin.save();
+				
+				if(blockedUserLogin.timesFailed == 3)
+				{
+					var now = new Date();
+					var blockEndDate = new Date(now);
+					
+					//blockEndDate.setSeconds(blockEndDate.getSeconds() + 10);
+					// blockEndDate.setDate(blockEndDate.getDate() + 7);
+					blockEndDate.setHours(blockEndDate.getHours() + 4);
+					
+					blockedUserLogin.blockedTillDate = blockEndDate;
+					blockedUserLogin.save();
+				}
+			}
+		}
+		else
+		//There was an error
+		{
+			console.log(err);
+		}
+	});
+}
+
 router.post('/login', requiredPostParams(['password', 'studentnumber']), function (req, res) {
 	const form = req.body;
 	
@@ -33,7 +73,7 @@ router.post('/login', requiredPostParams(['password', 'studentnumber']), functio
     const studentNumber = form.studentnumber;
 	
 	if (isNaN(studentNumber)) {
-		res.json({ err: 'Student nummer moet een getal zijn' });
+		res.json({ err: 'Student nummer moet een getal zijn' });		
 		return;
 	}
 	
@@ -50,13 +90,44 @@ router.post('/login', requiredPostParams(['password', 'studentnumber']), functio
 		
 		user.validPassword(password, function (same) {
 			if (!same) {
+				
+				WrongLogin(req);
 				res.json({ err: 'verkeerd wachtwoord' });
 				return;
 			}
 			
-			const token = jwt.sign(user, config.secret, { expiresIn: config.auth.expirationTime.toString() });
-			
-			res.json({token: token, user: user});
+			BlockedUserLogin.findOne({blockedIp: req.connection.remoteAddress}, function(err, blockedUserLogin)
+			{			
+				// This user is a baddy
+				if (blockedUserLogin && blockedUserLogin.blockedTillDate) 
+				{				
+					const dateNow = new Date();
+					
+					dateNow.setHours(dateNow.getHours() + 1);
+					
+					if(dateNow > blockedUserLogin.blockedTillDate)
+					{
+						// Delete the blockedUserLogin and give the user his JWT Token
+						BlockedUserLogin.remove({blockedIp: req.connection.remoteAddress, blockedTillDate: blockedUserLogin.blockedTillDate}, function (err) {
+							console.log("Removed a blockUserLogin document because it was expired");
+						});
+						
+						const token = jwt.sign(user, config.secret, { expiresIn: config.auth.expirationTime.toString() });	
+						res.json({token: token, user: user});
+						return;
+					}
+					else
+					{
+						res.json({ err: 'Je hebt tevaak verkeerd ingelogd, je kan weer inloggen op de volgende datum: ' + blockedUserLogin.blockedTillDate });
+						return;
+					}
+				}
+				else
+				{							
+					const token = jwt.sign(user, config.secret, { expiresIn: config.auth.expirationTime.toString() });	
+					res.json({token: token, user: user});
+				}
+			});
 		});
 		
 	});
