@@ -107,7 +107,7 @@ router.post('/login', requiredPostParams(['password', 'studentnumber']), functio
 							const blockedUserLogin = new BlockedUserLogin({ blockedIp: req.connection.remoteAddress, timesFailed: 1 });
 							blockedUserLogin.save();
 							
-							res.json({ err: 'Verkeerd wachtwoord' });
+							res.json({ err: 'Verkeerd wachtwoord mark' });
 							return;
 						}
 						
