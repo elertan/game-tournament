@@ -28,7 +28,7 @@ router.get('/login', function (req, res) {
 });
 
 function WrongLogin(req) {
-		BlockedUserLogin.findOne({blockedIp: req.connection.remoteAddress}, function (err, blockedUserLogin) {			
+		BlockedUserLogin.findOne({ blockedIp: req.connection.remoteAddress }, function (err, blockedUserLogin) {
 		if(!err)
 		{
 			//This blockedUserLogin doesnt exist yet
@@ -82,54 +82,56 @@ router.post('/login', requiredPostParams(['password', 'studentnumber']), functio
 		return;
 	}
 	
-	LocalUser.findOne({studentnumber: studentNumber}, function (err, user) {
-		if (!user) {
-			res.json({err: 'Gebruiker niet gevonden'});
-			return;
+	BlockedUserLogin.findOne({ blockedIp: req.connection.remoteAddress }, function(err, blockedUserLogin) {
+		if (blockedUserLogin && blockedUserLogin.blockedTillDate) {
+			const now = new Date();
+			if (now > blockedUserLogin.blockedTillDate) {
+				BlockedUserLogin.remove({ blockedIp: req.connection.remoteAddress });
+				return;
+			} else {
+				res.json({ err: 'Je hebt tevaak verkeerd ingelogd, je kan weer inloggen op de volgende datum: ' + blockedUserLogin.blockedTillDate });
+				return;
+			}
 		}
 		
-		user.validPassword(password, function (same) {
-			if (!same) {
-				
-				WrongLogin(req);
-				res.json({ err: 'verkeerd wachtwoord' });
+		LocalUser.findOne({ studentnumber: studentNumber }, function (err, user) {
+			if (!user) {
+				res.json({err: 'Gebruiker niet gevonden'});
 				return;
 			}
 			
-			BlockedUserLogin.findOne({blockedIp: req.connection.remoteAddress}, function(err, blockedUserLogin)
-			{			
-				// This user is a baddy
-				if (blockedUserLogin && blockedUserLogin.blockedTillDate) 
-				{				
-					const dateNow = new Date();
-					
-					dateNow.setHours(dateNow.getHours() + 1);
-					
-					if(dateNow > blockedUserLogin.blockedTillDate)
-					{
-						// Delete the blockedUserLogin and give the user his JWT Token
-						BlockedUserLogin.remove({blockedIp: req.connection.remoteAddress, blockedTillDate: blockedUserLogin.blockedTillDate}, function (err) {
-							console.log("Removed a blockUserLogin document because it was expired");
-						});
+			user.validPassword(password, function (same) {
+				if (!same) {
+					BlockedUserLogin.findOne({ blockedIp: req.connection.remoteAddress }, function (err, blockedUserLogin) {
+						if (!blockedUserLogin) {
+							const blockedUserLogin = new BlockedUserLogin({ blockedIp: req.connection.remoteAddress, timesFailed: 1 });
+							blockedUserLogin.save();
+							
+							res.json({ err: 'Verkeerd wachtwoord' });
+							return;
+						}
 						
-						const token = jwt.sign(user, config.secret, { expiresIn: config.auth.expirationTime.toString() });	
-						res.json({token: token, user: user});
+						blockedUserLogin.timesFailed++;
+						
+						if (blockedUserLogin.timesFailed > 2) {
+							var now = new Date(new Date().getTime() + 60 * 60000);
+							var blockEndDate = new Date(now.getTime() + Math.pow(2, blockedUserLogin.timesFailed - 2)  * 60000); // Add 5 minutes
+							
+							blockedUserLogin.blockedTillDate = blockEndDate;
+						}
+						
+						blockedUserLogin.save();
+						
+						res.json({ err: 'Verkeerd wachtwoord, poging ' + blockedUserLogin.timesFailed });
 						return;
-					}
-					else
-					{
-						res.json({ err: 'Je hebt tevaak verkeerd ingelogd, je kan weer inloggen op de volgende datum: ' + blockedUserLogin.blockedTillDate });
-						return;
-					}
+					});
+					return;
 				}
-				else
-				{							
-					const token = jwt.sign(user, config.secret, { expiresIn: config.auth.expirationTime.toString() });	
-					res.json({token: token, user: user});
-				}
+				
+				const token = jwt.sign(user, config.secret, { expiresIn: config.auth.expirationTime.toString() });
+				res.json({token: token, user: user});
 			});
 		});
-		
 	});
 });
 
