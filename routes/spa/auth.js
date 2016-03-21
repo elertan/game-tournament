@@ -70,7 +70,7 @@ router.post('/login', requiredPostParams(['password', 'studentnumber']), functio
 	const form = req.body;
 	
 	const password = form.password;
-    const studentNumber = form.studentnumber;
+	const studentNumber = form.studentnumber;
 	
 	if (isNaN(studentNumber)) {
 		res.json({ err: 'Student nummer moet een getal zijn' });		
@@ -100,7 +100,7 @@ router.post('/login', requiredPostParams(['password', 'studentnumber']), functio
 			{			
 				// This user is a baddy
 				if (blockedUserLogin && blockedUserLogin.blockedTillDate) 
-				{				
+				{
 					const dateNow = new Date();
 					
 					dateNow.setHours(dateNow.getHours() + 1);
@@ -123,7 +123,7 @@ router.post('/login', requiredPostParams(['password', 'studentnumber']), functio
 					}
 				}
 				else
-				{							
+				{
 					const token = jwt.sign(user, config.secret, { expiresIn: config.auth.expirationTime.toString() });	
 					res.json({token: token, user: user});
 				}
@@ -166,7 +166,7 @@ router.post('/register', requiredPostParams(['studentnumber']), function (req, r
 			}
 			
 			const code = randomstring.generate();
-					
+
 			const reg = new Registration({
 				studentnumber: studentnumber,
 				verificationCode: code
