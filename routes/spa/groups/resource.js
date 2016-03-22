@@ -11,7 +11,17 @@ const Group = require('../../../models/group');
 
 // Get all
 router.get('/', function (req, res) {
-	res.status(200);
+	request.get({
+		url: config.apiServer + '/groups'
+	}, function (err, httpRes, body) {
+		if (err) {
+			res.status(500);
+			return;
+		}
+
+		const data = JSON.parse(body);
+		res.json(data);
+	});
 });
 
 // Create

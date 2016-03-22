@@ -8,10 +8,9 @@ const randomstring = require('randomstring');
 const request = require('request');
 
 const User = require('../../models/user.js');
-const LocalUser = require('../../models/local/user.js');
-const Registration = require('../../models/local/registration.js');
-const BlockedUserLogin = require('../../models/local/blockedUserLogin.js');
-const PasswordReset = require('../../models/local/password-reset.js');
+const Registration = require('../../models/registration.js');
+const BlockedUserLogin = require('../../models/blockedUserLogin.js');
+const PasswordReset = require('../../models/password-reset.js');
 
 const config = require('../../config');
 const jwt = require('jsonwebtoken');
@@ -94,7 +93,7 @@ router.post('/login', requiredPostParams(['password', 'studentnumber']), functio
 			}
 		}
 		
-		LocalUser.findOne({ studentnumber: studentNumber }, function (err, user) {
+		User.findOne({ studentnumber: studentNumber }, function (err, user) {
 			if (!user) {
 				res.json({err: 'Gebruiker niet gevonden'});
 				return;
@@ -152,7 +151,7 @@ router.post('/register', requiredPostParams(['studentnumber']), function (req, r
 		return;
 	}
 	
-	LocalUser.findOne({ studentnumber: parseInt(form.studentnumber) }, function (err, localUser) {
+	User.findOne({ studentnumber: parseInt(form.studentnumber) }, function (err, localUser) {
 		if (localUser) {
 			res.json({ err: 'Deze student is al geregistreerd' });
 			return;
@@ -182,7 +181,7 @@ router.post('/register', requiredPostParams(['studentnumber']), function (req, r
 					from: 'info@gametournament.nl',
 					to: email,
 					subject: 'Account Activatie',
-					text: 'Beste Leerling,\n\nDruk op deze link om jouw account aan te maken http://localhost:1337/#/auth/register/' + code + '\n\nMet vriendelijke groet,\n\nHet game tournament team'
+					text: 'Beste Leerling,\n\nDruk op deze link om jouw account aan te maken ' + config.site + '/#/auth/register/' + code + '\n\nMet vriendelijke groet,\n\nHet game tournament team'
 				};
 				
 				transporter.sendMail(data, function (err, info) {
@@ -217,7 +216,7 @@ router.post('/forgotPassword', requiredPostParams(['studentNumber']), function (
 		return;
 	}
 
-	LocalUser.findOne({ studentnumber: studentNumber }, function (err, user) {
+	User.findOne({ studentnumber: studentNumber }, function (err, user) {
 		if (!user) {
 			res.json({ err: 'Deze student heeft nog geen account geregistreerd' });
 			return;
@@ -247,7 +246,7 @@ router.post('/forgotPassword', requiredPostParams(['studentNumber']), function (
 				from: 'info@gametournament.nl',
 				to: email,
 				subject: 'Wachtwoord Vergeten',
-				text: 'Beste Leerling,\n\nDruk op deze link om jouw wachtwoord te resetten http://localhost:1337/#/auth/forgotPassword/' + code + '\n\nMet vriendelijke groet,\n\nHet game tournament team'
+				text: 'Beste Leerling,\n\nDruk op deze link om jouw wachtwoord te resetten ' + config.site + '/#/auth/forgotPassword/' + code + '\n\nMet vriendelijke groet,\n\nHet game tournament team'
 			};
 
 			transporter.sendMail(data, function (err, info) {
@@ -340,11 +339,11 @@ router.post('/forgotPassword/verify', requiredPostParams(['password', 'repasswor
 			return;
 		}
 
-		LocalUser.findOne({ studentnumber: form.studentnumber }, function (err, localUser) {
+		User.findOne({ studentnumber: form.studentnumber }, function (err, localUser) {
 			passwordReset.remove();
 
 			request.post({
-				url: 'http://localhost:1337/api/auth/changePassword',
+				url: config.apiServer + '/auth/changePassword',
 				form: {
 					email: form.studentnumber + '@mydavinci.nl',
 					password: form.password,
@@ -398,7 +397,7 @@ router.post('/register/verify', requiredPostParams(['password', 'repassword', 'f
 		registration.remove();
 
 		request.post({
-			url: 'http://localhost:1337/api/auth/register',
+			url: config.apiServer + '/auth/register',
 			form: {
 				email: form.studentnumber + '@mydavinci.nl',
 				password: form.password
@@ -410,13 +409,13 @@ router.post('/register/verify', requiredPostParams(['password', 'repassword', 'f
 				return;
 			}
 
-			const localUser = new LocalUser(data.user);
+			const localUser = new User(data.user);
 			localUser.firstname = form.firstname;
 			localUser.lastname = form.lastname;
 			localUser.studentnumber = parseInt(form.studentnumber);
 
 			request.post({
-				url: 'http://localhost:1337/api/auth/login',
+				url: config.apiServer + '/auth/login',
 				form: {
 					email: form.studentnumber + '@mydavinci.nl',
 					password: form.password
