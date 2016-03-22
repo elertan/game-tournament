@@ -1,40 +1,38 @@
 'use strict';
 
+const request = require('request');
+
 const express = require('express');
 const router = express.Router();
 
 const isAuth = require('../../../middleware/isAuth');
 
-const Group = require('../../../models/group'); // MOVE TO THE API, WE ARE IN THE SPA NOW THIS IS INCORRECT
+const Group = require('../../../models/group');
 
 // Get all
 router.get('/', function (req, res) {
-	// Group.find({}, function (err, groups) {
-	// 	res.json(groups);
-	// });
+	res.status(200);
 });
 
 // Create
 router.post('/', isAuth, function (req, res) {
-	const form = req.body;
-	
-	
+	res.status(200);
 });
 
 // Read
 router.get('/:id', function (req, res) {
-	
+	res.status(200);
 });
 
 // Update
 router.put('/:id', isAuth, function (req, res) {
 	const form = req.body;
-
+	res.status(200);
 });
 
 // Delete
 router.delete('/:id', isAuth, function (req, res) {
-	
+	res.status(200);
 });
 
 module.exports = router;
