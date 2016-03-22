@@ -7,8 +7,6 @@ const router = express.Router();
 
 const isAuth = require('../../../middleware/isAuth');
 
-const Group = require('../../../models/group');
-
 // Get all
 router.get('/', function (req, res) {
 	request.get({
