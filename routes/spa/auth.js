@@ -5,7 +5,7 @@ const router = express.Router();
 
 const nodemailer = require('nodemailer');
 const randomstring = require('randomstring');
-const request = require('request');
+const apiCall = require('../../modules/apiCall');
 
 const User = require('../../models/user.js');
 const Registration = require('../../models/registration.js');
@@ -343,15 +343,15 @@ router.post('/forgotPassword/verify', requiredPostParams(['password', 'repasswor
 		User.findOne({ studentnumber: form.studentnumber }, function (err, localUser) {
 			passwordReset.remove();
 
-			request.post({
-				url: config.apiServer + '/auth/changePassword',
+			apiCall({
+				method: 'post',
+				apiUrl: '/auth/changePassword',
 				form: {
 					email: form.studentnumber + '@mydavinci.nl',
 					password: form.password,
 					oldpassword: localUser.password
 				}
-			}, function (err, httpRes, body) {
-				const data = JSON.parse(body);
+			}, function (err, data) {
 				if (data.err) {
 					res.json({ err: data.err });
 					return;
@@ -397,14 +397,14 @@ router.post('/register/verify', requiredPostParams(['password', 'repassword', 'f
 
 		registration.remove();
 
-		request.post({
-			url: config.apiServer + '/auth/register',
+		apiCall({
+			method: 'post',
+			apiUri: '/auth/register',
 			form: {
 				email: form.studentnumber + '@mydavinci.nl',
 				password: form.password
 			}
-		}, function (err, httpRes, body) {
-			const data = JSON.parse(body);
+		}, function (err, data) {
 			if (data.err) {
 				res.json({ err: data.err });
 				return;
@@ -415,21 +415,19 @@ router.post('/register/verify', requiredPostParams(['password', 'repassword', 'f
 			localUser.lastname = form.lastname;
 			localUser.studentnumber = parseInt(form.studentnumber);
 
-			request.post({
-				url: config.apiServer + '/auth/login',
+			apiCall({
+				method: 'post',
+				apiUri: '/auth/login',
 				form: {
 					email: form.studentnumber + '@mydavinci.nl',
 					password: form.password
 				}
-			}, function (err, httpRes, body) {
-				const data = JSON.parse(body);
-				
+			}, function (err, data) {
 				if (data.err) {
 					// Handle error
 					return;
 				}
 				localUser.jwt = data.token;
-				
 				
 				localUser.save(function (err) {
 					res.json({ stateChange: 'auth/login' });

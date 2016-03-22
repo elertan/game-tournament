@@ -1,23 +1,21 @@
 'use strict';
 
-const request = require('request');
-
 const express = require('express');
 const router = express.Router();
 
 const isAuth = require('../../../middleware/isAuth');
+const apiCall = require('../../../modules/apiCall');
 
 // Get all
 router.get('/', function (req, res) {
-	request.get({
-		url: config.apiServer + '/groups'
-	}, function (err, httpRes, body) {
+	apiCall({
+		method: 'get',
+		apiUri: '/groups'
+	}, function (err, data) {
 		if (err) {
 			res.status(500);
 			return;
 		}
-
-		const data = JSON.parse(body);
 		res.json(data);
 	});
 });
