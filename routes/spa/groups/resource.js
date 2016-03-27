@@ -7,6 +7,7 @@ const router = express.Router();
 
 const isAuth = require('../../../middleware/isAuth');
 
+
 // Get all
 router.get('/', function (req, res) {
 	request.get({
