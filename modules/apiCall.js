@@ -13,6 +13,12 @@ module.exports = function (settings, cb) {
 	if (settings.apiUri) {
 		cfg.uri = config.apiServer + settings.apiUri;
 	}
+	
+	if (settings.method.toLowerCase() != 'get') {
+		cfg.headers = {
+			'Content-Type': 'application/x-www-form-urlencoded'
+		};
+	}
 
 	if (!request[settings.method]) {
 		cb({ msg: 'Not a valid request method' }, null);
