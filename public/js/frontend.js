@@ -295,6 +295,8 @@ app.controller('AuthRegisterVerify', ['$scope', '$http', '$stateParams', '$state
 	}]);
 	
 app.controller('Groups', ['$scope', '$state', 'Group', function ($scope, $state, Group) {
+	$scope.groups = Group.query();
+	
 	$scope.createNew = function () {
 		if (!$scope.loggedIn) {
 			return;
@@ -316,7 +318,7 @@ app.controller('GroupsCreate', ['$scope', '$state', 'Group', function ($scope, $
 			description: $scope.description
 		});
 		group.$save(function () {
-			alert('Group saved');
+			$state.go('groups');
 		});
 	};
 }]);

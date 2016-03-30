@@ -3,4 +3,11 @@ extends ../main.jade
 block content
 	div(ng-controller="Groups")
 		h1 Groups
-		button.btn.btn-success(ng-show="loggedIn", ng-click="createNew()") + Create New
+		button.btn.btn-success(ng-show="loggedIn", ng-click="createNew()", style="margin-bottom: 20px;") + Create New
+		div
+			div.col-md-4(ng-repeat="group in groups", style="background: grey; border-radius: 5px; color: #EEE; margin: 0px; border: 1px solid black;")
+				div(style="margin: 5px;")
+					h2 {{ group.name }}
+					p(style="font-style: italic;") by {{ group.owner.firstname }} {{ group.owner.lastname }}
+					hr
+					p {{ group.description }}

@@ -33,6 +33,11 @@ module.exports = function (settings, cb) {
 			cb({ err: err }, null);
 			return;
 		}
+		
+		if (body == "" && httpRes.statusCode == 200) {
+			cb(null, {});
+			return;
+		}
 
 		try {
 			const data = JSON.parse(body);
