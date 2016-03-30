@@ -22,7 +22,22 @@ router.get('/', function (req, res) {
 
 // Create
 router.post('/', isAuth, function (req, res) {
-	res.status(200);
+	apiCall({
+		method: 'post',
+		apiUri: '/groups',
+		jwt: req.user._doc.jwt,
+		form: {
+			name: 'test',
+			description: 'test'
+		}
+	}, function (err, data) {
+		if (err) {
+			res.status(500);
+			return;
+		}
+		res.status(200); 
+		res.json({ success: true });
+	});
 });
 
 // Read

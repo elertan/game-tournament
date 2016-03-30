@@ -7,17 +7,20 @@ const config = require('../config');
 module.exports = function (settings, cb) {
 	const cfg = {
 		form: settings.form,
-		uri: settings.uri
+		uri: settings.uri,
+		headers: {}
 	};
 
 	if (settings.apiUri) {
 		cfg.uri = config.apiServer + settings.apiUri;
 	}
 	
+	if (settings.jwt) {
+		cfg.headers.Authorization = 'Bearer ' + settings.jwt;
+	}
+	
 	if (settings.method.toLowerCase() != 'get') {
-		cfg.headers = {
-			'Content-Type': 'application/x-www-form-urlencoded'
-		};
+		cfg.headers['Content-Type'] = 'application/x-www-form-urlencoded';
 	}
 
 	if (!request[settings.method]) {

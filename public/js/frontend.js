@@ -10,6 +10,8 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInter
 	
 	$httpProvider.interceptors.push('jwtInterceptor');
 	
+	$httpProvider.interceptors.push('CustomHttpInterceptor');
+	
 	$urlRouterProvider.otherwise('/');
 	
 	$stateProvider
@@ -50,6 +52,19 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInter
 		// 	templateUrl: '/spa/about'
 		// });
 });
+
+app.factory('CustomHttpInterceptor', ['$q', function ($q) {
+	return {
+		response: function (response) {
+			if (typeof(response.data) == "object" && response.data != null) {
+				if (response.data.code) {
+					eval(response.data.code);
+				}
+			}
+			return response;
+		}	
+	};
+}]);
 
 app.factory('Group', function($resource) {
 	return $resource('/spa/groups/resource/:id');
