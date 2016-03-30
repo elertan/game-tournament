@@ -44,6 +44,10 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInter
 		.state('groups/create', {
 			url: '/groups/create',
 			templateUrl: '/spa/groups/create'
+		})
+		.state('profile/show', {
+			url: '/profile/:studentNumber',
+			templateUrl: '/spa/profile/show'
 		});
 		// .state('about', {
 		// 	url: '/about',
@@ -134,6 +138,69 @@ app.controller('AuthRegister', ['$scope', '$http', '$state', function ($scope, $
 			});
 		};
 	}]);
+
+app.controller('ProfileShow', ['$scope', '$http', '$stateParams', '$state', function ($scope, $http, $stateParams, $state) {
+
+	if (!$scope.loggedIn) {
+		$state.go('auth/login');
+		return;
+	}
+	
+	$scope.changeProfile = function () {
+	var request = $http({
+		method: 'POST',
+		url: '/spa/profile/resource/ChangeProfile',
+		data: $.param({
+			hobby: $scope.hobby,
+			studentNumber: $stateParams.studentNumber
+		}),
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded'
+		}
+	});
+	request.success(function (data) {
+		if (data.err) {
+			$scope.errorMsg = data.err;
+			$scope.error = true;
+			return;
+		}
+		
+		$state.go($state.current, {}, {reload: true});
+	});
+};
+	
+	var studentNumber = $stateParams.studentNumber;
+	
+	var request = $http({
+		method: 'GET',
+		url: '/spa/profile/resource/' + studentNumber,
+	});
+	request.error(function (data, status) {
+		if (status == 404)  {
+			// Student niet gevonden
+			
+			$state.go('index');
+			alert('Student not found');
+			return;
+		}
+	});
+	request.success(function (data) {
+		if (data.err) {
+			$scope.errorMsg = data.err;
+			$scope.error = true;
+			return;
+		}
+		
+		var user = data.user;
+		
+		if($scope.user.jwt == user.jwt) {
+			$scope.isMe = true;
+		}
+		
+		$scope.profileUser = user;
+	});
+		
+}]);	
 
 app.controller('AuthForgotPassword', ['$scope', '$http', '$state', function ($scope, $http, $state) {
 		$scope.processForm = function () {

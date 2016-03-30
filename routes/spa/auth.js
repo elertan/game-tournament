@@ -429,8 +429,7 @@ router.post('/register/verify', requiredPostParams(['password', 'repassword', 'f
 					return;
 				}
 				localUser.jwt = data.token;
-				
-				
+					
 				localUser.save(function (err) {
 					res.json({ stateChange: 'auth/login' });
 				});

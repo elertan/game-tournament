@@ -30,7 +30,7 @@ div(ng-controller="Main")
 							span.caret
 						ul.dropdown-menu
 							li
-								a(ui-sref="profile") Profiel
+								a(ui-sref="profile/show({ studentNumber: user.studentnumber })") Profiel
 							li
 								a(ng-click="logout()") Logout 
 				
