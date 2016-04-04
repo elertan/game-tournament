@@ -5,6 +5,7 @@ block content
 		h1 Groups
 		button.btn.btn-success(ng-show="loggedIn", ng-click="createNew()", style="margin-bottom: 20px;") + Create New
 		div
+			h2(ng-show="!groups") Er zijn nog geen groepen aangemaakt
 			div.col-md-4(ng-repeat="group in groups", style="background: grey; border-radius: 5px; color: #EEE; margin: 0px; border: 1px solid black;")
 				div(style="margin: 5px;")
 					h2 {{ group.name }}

@@ -39,17 +39,21 @@ router.get('/', function (req, res) {
 });
 
 // Create
-router.post('/', isAuth, requiredPostParams(['name', 'description']), function (req, res) {
+router.post('/', isAuth, requiredPostParams(['name', 'description', 'userEmails']), function (req, res) {
+	for (var i = 0; i < req.body.userEmails.length; i++) {
+		req.body.userEmails[i] = req.body.userEmails[i] + '@mydavinci.nl';
+	}
 	apiCall({
 		method: 'post',
 		apiUri: '/groups',
 		jwt: req.user._doc.jwt,
 		form: {
 			name: req.body.name,
-			description: req.body.description
+			description: req.body.description,
+			userEmails: req.body.userEmails
 		}
 	}, function (err, data) {
-		if (err) {
+		if (err || data.err) {
 			res.status(500);
 			res.end();
 			return;

@@ -8,4 +8,7 @@ block content
 		form#groupcreateform.col-md-offset-3.col-md-6(style="margin-top: 20px;")
 			input.form-control(style="margin-bottom: 5px;", type="text", placeholder="Naam", ng-model="name")
 			input.form-control(type="text", placeholder="Omschrijving", ng-model="description")
-			input.form-control(ng-click="processForm()", type="submit", value="Maak aan", style="margin-top: 10px;")
+			select.chosen-select(data-placeholder="Groep Uitnodigingen", multiple="", style="width: 100%;" tabindex="-1", ng-model="invitations")
+				option(value="")
+				option(ng-repeat="user in users", value="{{ user.studentnumber }}") {{ user.firstname }} {{ user.lastname }} - {{ user.studentnumber }}
+			input.form-control(ng-click="processForm()", type="submit", value="Maak aan", style="margin-top: 15px;")

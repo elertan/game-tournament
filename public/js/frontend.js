@@ -70,6 +70,10 @@ app.factory('Group', function($resource) {
 	return $resource('/spa/groups/resource/:id');
 });
 
+app.factory('User', function($resource) {
+	return $resource('/spa/users/resource/:id');
+});
+
 app.controller('Main', ['$scope', '$state', function ($scope, $state) {
 	if (localStorage.getItem('jwt') != null) {
 		$scope.loggedIn = true;
@@ -306,16 +310,21 @@ app.controller('Groups', ['$scope', '$state', 'Group', function ($scope, $state,
 	};
 }]);
 
-app.controller('GroupsCreate', ['$scope', '$state', 'Group', function ($scope, $state, Group) {
+// TODO: Clicking the chosen select menu calls processForm somehow, even though its not linked
+app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function ($scope, $state, Group, User) {
 	if (!$scope.loggedIn) {
 		$state.go('auth/login');
 		return;
 	}
+	$('.chosen-select').chosen({});
+
+	$scope.users = User.query();	
 	
 	$scope.processForm = function () {
 		var group = new Group({
 			name: $scope.name,
-			description: $scope.description
+			description: $scope.description,
+			userEmails: $scope.invitations
 		});
 		group.$save(function () {
 			$state.go('groups');
