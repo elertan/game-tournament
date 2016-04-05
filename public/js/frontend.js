@@ -316,15 +316,19 @@ app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function ($
 		$state.go('auth/login');
 		return;
 	}
-	$('.chosen-select').chosen({});
 
-	$scope.users = User.query();	
+	$scope.users = User.query();
+	$scope.$watch('users', function () {
+		setTimeout(function () {
+			$('.selectpicker').selectpicker();
+		}, 50);
+	});
 	
 	$scope.processForm = function () {
 		var group = new Group({
 			name: $scope.name,
 			description: $scope.description,
-			userEmails: $scope.invitations
+			userEmails: $scope.invitations || []
 		});
 		group.$save(function () {
 			$state.go('groups');
