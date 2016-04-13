@@ -29,73 +29,66 @@ router.get('/login', function (req, res) {
 router.post('/login', requiredPostParams(['password', 'studentnumber']), function (req, res) {
 	const form = req.body;
 	
+	// Find an existing blocked user login based on the ip address
+	BlockedUserLogin.findOne({ blockedIp: req.connection.remoteAddress }, function (err, blockedUserLogin) {
+		// There doesnt exist a blocked user login for this ip
+		if (!blockedUserLogin) {
+			// create a blockedUserlogin with 1 fail
+			const blockedUserLogin = new BlockedUserLogin({ blockedIp: req.connection.remoteAddress, timesFailed: 1 });
+			// save it to the database
+			blockedUserLogin.save();
+			
+			// Respond to the client with a wrong password
+			res.json({ err: 'Verkeerd wachtwoord' });
+			return;
+		}
+		
+		// Store the current time
+		var now = new Date(new Date() + 60 * 60000);// + 60 * 60000
+		// Increment failure time
+		blockedUserLogin.timesFailed++;
+		// Create new retry
+		var blockEndDate = new Date(now.getTime() + Math.pow(2, blockedUserLogin.timesFailed - 2)  * 60000);
+		
+		blockedUserLogin.blockedTillDate = blockEndDate;
+		
+		blockedUserLogin.save();
+		
+		if (blockedUserLogin.blockedTillDate){
+			res.json({ err: 'U heeft te vaak een verkeerde inlog poging gehad, u kunt weer over ' + blockedUserLogin.blockedTillDate + ' inloggen'});
+		} else {
+			res.json({ err: 'Verkeerde inlogpoging nog ' + (3 - blockedUserLogin.timesFailed) + ' poging(en) tot je voor een bepaalde tijd niet kan inloggen'});
+		}
+	});
+
 	const password = form.password;
 	const studentNumber = form.studentnumber;
 	
+	// Studentnumber is a number
 	if (isNaN(studentNumber)) {
 		res.json({ err: 'Student nummer moet een getal zijn' });		
 		return;
 	}
 	
+	// Studentnumber is 8 numbers in length
 	if (studentNumber.length != 8) {
 		res.json({ err: 'Studentnummer moet 8 getallen zijn' });
 		return;
 	}		
 	
+	// Find the user by the studentnumber
 	User.findOne({ studentnumber: studentNumber }, function (err, user) {
+		// User wasnt found
 		if (!user) {
 			res.json({err: 'Gebruiker niet gevonden'});
 			return;
 		}
 		
+		// Check if the password is correct
 		user.validPassword(password, function (same) {
-			if (!same) 
-			{
-				BlockedUserLogin.findOne({ blockedIp: req.connection.remoteAddress }, function (err, blockedUserLogin) {
-					if (!blockedUserLogin) {
-						const blockedUserLogin = new BlockedUserLogin({ blockedIp: req.connection.remoteAddress, timesFailed: 1 });
-						blockedUserLogin.save();
-						
-						res.json({ err: 'Verkeerd wachtwoord' });
-						return;
-					}
-					
-					var now = new Date(new Date() + 60 * 60000);// + 60 * 60000
-					
-					if (blockedUserLogin.timesFailed < 3) {
-						blockedUserLogin.timesFailed++;
-					}
-					
-					if (blockedUserLogin.timesFailed == 3 && blockedUserLogin.blockedTillDate == null) {
-						
-						var result = Math.pow(2, blockedUserLogin.timesFailed - 2)  * 60000;
-						var blockEndDate = new Date(now.getTime() + Math.pow(2, blockedUserLogin.timesFailed - 2)  * 60000);
-						
-						blockedUserLogin.blockedTillDate = blockEndDate;
-					}
-					
-					if (now > blockedUserLogin.blockedTillDate) {
-						
-						blockedUserLogin.timesFailed++;
-						var result = Math.pow(2, blockedUserLogin.timesFailed - 2)  * 60000;
-						var blockEndDate = new Date(now.getTime() + Math.pow(2, blockedUserLogin.timesFailed - 2)  * 60000);
-						
-						blockedUserLogin.blockedTillDate = blockEndDate;
-					}
-					
-					blockedUserLogin.save();
-					
-					if(blockedUserLogin.blockedTillDate)
-					{
-						res.json({ err: 'U heeft te vaak een verkeerde inlog poging gehad, u kunt weer op: ' + blockedUserLogin.blockedTillDate + ' inloggen'});
-						return;	
-					}
-					else
-					{
-						res.json({ err: 'Verkeerde inlogpoging nog: ' + (3 - blockedUserLogin.timesFailed) + ' pogingen tot je voor een bepaalde tijd niet kan inloggen'});
-						return;		
-					}
-				});
+			// Password is incorrect
+			if (!same) {
+				
 				return;
 			}
 			
