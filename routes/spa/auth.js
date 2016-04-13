@@ -33,13 +33,72 @@ router.post('/login', requiredPostParams(['password', 'studentnumber']), functio
 	BlockedUserLogin.findOne({ blockedIp: req.connection.remoteAddress }, function (err, blockedUserLogin) {
 		// There doesnt exist a blocked user login for this ip
 		if (!blockedUserLogin) {
+
+			const password = form.password;
+			const studentNumber = form.studentnumber;
+			
+			// Studentnumber is a number
+			if (isNaN(studentNumber)) {
+				res.json({ err: 'Student nummer moet een getal zijn' });		
+				return;
+			}
+			
+			// Studentnumber is 8 numbers in length
+			if (studentNumber.length != 8) {
+				res.json({ err: 'Studentnummer moet 8 getallen zijn' });
+				return;
+			}
+
+			// Find the user by the studentnumber
+			User.findOne({ studentnumber: studentNumber }, function (err, user) {
+				// User wasnt found
+				if (!user) {
+					res.json({err: 'Gebruiker niet gevonden'});
+					return;
+				}
+				
+				// Check if the password is correct
+				user.validPassword(password, function (same) {
+					// Password is incorrect
+					if (!same) {
+						return;
+					}
+					
+					BlockedUserLogin.findOne({ blockedIp: req.connection.remoteAddress }, function (err, blockedUserLogin) {
+						if (blockedUserLogin) {
+							if (blockedUserLogin.blockedTillDate) {
+								var now = new Date(new Date() + 60 * 60000);// + 60 * 60000
+								if (now > blockedUserLogin.blockedTillDate) {			
+									BlockedUserLogin.remove({ blockedIp: req.connection.remoteAddress }, function (err, removedDocument)	{
+										const token = jwt.sign(user, config.secret, { expiresIn: config.auth.expirationTime.toString() });
+										res.json({ token: token, user: user });
+									});
+									return;
+								} else {
+									res.json({ err: 'U heeft te vaak een verkeerde inlog poging gehad, u kunt weer op: ' + blockedUserLogin.blockedTillDate + ' inloggen'});
+									return;	
+								}
+							}
+							
+							BlockedUserLogin.remove({ blockedIp: req.connection.remoteAddress }, function (err, removedDocument) {
+								const token = jwt.sign(user, config.secret, { expiresIn: config.auth.expirationTime.toString() });
+								res.json({token: token, user: user});
+							});
+						} else {
+							const token = jwt.sign(user, config.secret, { expiresIn: config.auth.expirationTime.toString() });
+							res.json({ token: token, user: user });
+						}		
+					});
+				});
+			});
+
 			// create a blockedUserlogin with 1 fail
-			const blockedUserLogin = new BlockedUserLogin({ blockedIp: req.connection.remoteAddress, timesFailed: 1 });
+			blockedUserLogin = new BlockedUserLogin({ blockedIp: req.connection.remoteAddress, timesFailed: 1 });
 			// save it to the database
 			blockedUserLogin.save();
 			
 			// Respond to the client with a wrong password
-			res.json({ err: 'Verkeerd wachtwoord' });
+			res.json({ err: 'Incorrect studentnummer en/of wachtwoord' });
 			return;
 		}
 		
@@ -47,84 +106,24 @@ router.post('/login', requiredPostParams(['password', 'studentnumber']), functio
 		var now = new Date(new Date() + 60 * 60000);// + 60 * 60000
 		// Increment failure time
 		blockedUserLogin.timesFailed++;
-		// Create new retry
-		var blockEndDate = new Date(now.getTime() + Math.pow(2, blockedUserLogin.timesFailed - 2)  * 60000);
-		
-		blockedUserLogin.blockedTillDate = blockEndDate;
-		
-		blockedUserLogin.save();
-		
-		if (blockedUserLogin.blockedTillDate){
-			res.json({ err: 'U heeft te vaak een verkeerde inlog poging gehad, u kunt weer over ' + blockedUserLogin.blockedTillDate + ' inloggen'});
-		} else {
-			res.json({ err: 'Verkeerde inlogpoging nog ' + (3 - blockedUserLogin.timesFailed) + ' poging(en) tot je voor een bepaalde tijd niet kan inloggen'});
-		}
-	});
 
-	const password = form.password;
-	const studentNumber = form.studentnumber;
-	
-	// Studentnumber is a number
-	if (isNaN(studentNumber)) {
-		res.json({ err: 'Student nummer moet een getal zijn' });		
-		return;
-	}
-	
-	// Studentnumber is 8 numbers in length
-	if (studentNumber.length != 8) {
-		res.json({ err: 'Studentnummer moet 8 getallen zijn' });
-		return;
-	}		
-	
-	// Find the user by the studentnumber
-	User.findOne({ studentnumber: studentNumber }, function (err, user) {
-		// User wasnt found
-		if (!user) {
-			res.json({err: 'Gebruiker niet gevonden'});
-			return;
+		// Create next wait time
+		var waitTime = (Math.pow(config.auth.blockedLoginIncremental, blockedUserLogin.timesFailed - config.auth.blockedLoginMaxTries - 1) || 1)  * (config.auth.blockedLoginInitialTime * 100);
+
+		// Set the blockEndDate if the fail amount is greater than the max
+		if (blockedUserLogin.timesFailed > config.auth.blockedLoginMaxTries) {
+			var blockEndDate = new Date(now.getTime() + waitTime);
+			blockedUserLogin.blockedTillDate = blockEndDate;
 		}
 		
-		// Check if the password is correct
-		user.validPassword(password, function (same) {
-			// Password is incorrect
-			if (!same) {
-				
-				return;
-			}
-			
-			BlockedUserLogin.findOne({ blockedIp: req.connection.remoteAddress }, function (err, blockedUserLogin) {
-				if(blockedUserLogin)
-				{
-					if (blockedUserLogin.blockedTillDate) {
-						
-						var now = new Date(new Date() + 60 * 60000);// + 60 * 60000
-						if (now > blockedUserLogin.blockedTillDate) 
-						{			
-							BlockedUserLogin.remove({ blockedIp: req.connection.remoteAddress }, function(err, removedDocument)	{
-								const token = jwt.sign(user, config.secret, { expiresIn: config.auth.expirationTime.toString() });
-								res.json({token: token, user: user});
-							});
-							return;
-						}
-						else
-						{
-							res.json({ err: 'U heeft te vaak een verkeerde inlog poging gehad, u kunt weer op: ' + blockedUserLogin.blockedTillDate + ' inloggen'});
-							return;	
-						}
-					}
-					
-					BlockedUserLogin.remove({ blockedIp: req.connection.remoteAddress }, function(err, removedDocument)	{
-						const token = jwt.sign(user, config.secret, { expiresIn: config.auth.expirationTime.toString() });
-						res.json({token: token, user: user});
-					});
-				}
-				else
-				{
-					const token = jwt.sign(user, config.secret, { expiresIn: config.auth.expirationTime.toString() });
-					res.json({token: token, user: user});
-				}		
-			});
-		});
+		// Give different messages depending on if the login is blocked or not
+		if (blockedUserLogin.blockedTillDate) {
+			res.json({ err: 'U heeft te vaak een verkeerde inlog poging gehad, u kunt weer over ' + Math.ceil(waitTime / 60 / 100) + ' minuten proberen in te loggen' });
+		} else {
+			res.json({ err: 'Incorrect studentnummer en/of wachtwoord, nog ' + ((config.auth.blockedLoginMaxTries - blockedUserLogin.timesFailed) + 1) + ' poging(en) tot je voor een bepaalde tijd niet kan inloggen' });
+		}
+		// Save the block data
+		blockedUserLogin.save();
 	});
 });
 
