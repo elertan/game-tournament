@@ -384,10 +384,26 @@ app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function ($
 		return;
 	}
 
-	$scope.users = User.query();
-	$scope.$watch('users', function () {
-		setTimeout(function () {
-			$('.selectpicker').selectpicker();
+	User.query(function (users) {
+		// remove self from list
+		for (var i = 0; i < users.length; i++) {
+			if (users[i].studentnumber == $scope.user.studentnumber) {
+				users[i] = undefined;
+				break;
+			}
+		}
+		for (var i = 0; i < users.length; i++) {
+			if (users[i] == undefined) {
+				delete users[i];
+				break;
+			}
+		}
+
+		users = users.filter(function (val) { return val; });
+		$scope.users = users;
+	
+		setTimeout(function () { 
+			$('.selectpicker').selectpicker(); 
 		}, 50);
 	});
 	
