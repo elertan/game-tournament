@@ -9,5 +9,5 @@ block content
 			input.form-control(style="margin-bottom: 5px;", type="text", placeholder="Naam", ng-model="name", required="")
 			input.form-control(type="text", placeholder="Omschrijving", ng-model="description", required="")
 			select.form-control.selectpicker(multiple="" ng-model="invitations" data-live-search="true" title="Uitnodigingen Deelnemers")
-				option(ng-repeat="user in users", value="{{ user.studentnumber }}") {{ user.firstname }} {{ user.lastname }} - {{ user.studentnumber }}
+				option(ng-repeat="user in users", value="{{ user._id }}") {{ user.firstname }} {{ user.lastname }} - {{ user.studentnumber }}
 			input.form-control#groupsCreateSubmit(ng-click="processForm()", type="submit", value="Maak aan", style="margin-top: 15px;")

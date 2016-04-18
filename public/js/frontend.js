@@ -19,6 +19,10 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInter
 			url: '/',
 			templateUrl: '/spa/index'
 		})
+		.state('about', {
+			url: '/about',
+			templateUrl: '/spa/about'
+		})
 		.state('auth/login', {
 			url: '/auth/login',
 			templateUrl: '/spa/auth/login'
@@ -83,7 +87,7 @@ app.controller('Main', ['$scope', '$state', function ($scope, $state) {
 		$scope.loggedIn = true;
 		$scope.user = JSON.parse(localStorage.user);
 	}
-	
+
 	$scope.logout = function () {
 		localStorage.removeItem('jwt');
 		localStorage.removeItem('user');
@@ -366,7 +370,11 @@ app.controller('AuthRegisterVerify', ['$scope', '$http', '$stateParams', '$state
 	}]);
 	
 app.controller('Groups', ['$scope', '$state', 'Group', function ($scope, $state, Group) {
-	$scope.groups = Group.query();
+	$scope.groups = [];
+	Group.query(function (groups) {
+		$scope.groups = groups;
+		console.log(groups);
+	});
 	
 	$scope.createNew = function () {
 		if (!$scope.loggedIn) {
@@ -411,7 +419,7 @@ app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function ($
 		var group = new Group({
 			name: $scope.name,
 			description: $scope.description,
-			userEmails: $scope.invitations || []
+			userIds: $scope.invitations || []
 		});
 		group.$save(function () {
 			$state.go('groups');
