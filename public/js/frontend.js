@@ -43,6 +43,10 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInter
 			url: '/groups',
 			templateUrl: '/spa/groups'
 		})
+		.state('groups/show', {
+			url: '/groups/show/:groupId',
+			templateUrl: '/spa/groups/show'
+		})
 		.state('groups/create', {
 			url: '/groups/create',
 			templateUrl: '/spa/groups/create'
@@ -159,7 +163,6 @@ app.controller('AuthRegister', ['$scope', '$http', '$state', function ($scope, $
 	}]);
 
 app.controller('ProfileShow', ['$scope', '$http', '$stateParams', '$state', function ($scope, $http, $stateParams, $state) {
-
 	if (!$scope.loggedIn) {
 		$state.go('auth/login');
 		return;
@@ -311,7 +314,8 @@ app.controller('AuthForgotPasswordVerify', ['$scope', '$http', '$stateParams', '
 		
 	}]);
 
-app.controller('AuthRegisterVerify', ['$scope', '$http', '$stateParams', '$state', function ($scope, $http, $stateParams, $state) {
+app.controller('AuthRegisterVerify', ['$scope', '$http', '$stateParams', '$state', function ($scope, $http, $stateParams, $state) 
+{
 		var code = $stateParams.verificationCode;
 		
 		var request = $http({
@@ -365,8 +369,32 @@ app.controller('AuthRegisterVerify', ['$scope', '$http', '$stateParams', '$state
 		};
 	}]);
 	
-app.controller('Groups', ['$scope', '$state', 'Group', function ($scope, $state, Group) {
+app.controller('Groups', ['$scope', '$http', '$state', 'Group', function ($scope, $http, $state, Group) {
 	$scope.groups = Group.query();
+	
+	$scope.groupMouseEnter = function (event)
+	{
+		$(event.currentTarget).css("background", "#4F554F");
+	}
+	
+	$scope.groupMouseLeave = function (event)
+	{
+		$(event.currentTarget).css("background", "#808080");
+	}
+	
+	$scope.groupMouseClick = function (event, id)
+	{
+		var request = $http({
+			method: 'GET',
+			url: '/spa/groups/resource/' + id,
+		});
+		
+		request.success(function (data) 
+		{	
+			$state.go($state.go('groups/show', {groupId: id}, {}), {reload: true});
+		});
+	
+	}
 	
 	$scope.createNew = function () {
 		if (!$scope.loggedIn) {
@@ -377,7 +405,6 @@ app.controller('Groups', ['$scope', '$state', 'Group', function ($scope, $state,
 	};
 }]);
 
-// TODO: Clicking the chosen select menu calls processForm somehow, even though its not linked
 app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function ($scope, $state, Group, User) {
 	if (!$scope.loggedIn) {
 		$state.go('auth/login');
@@ -401,4 +428,10 @@ app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function ($
 			$state.go('groups');
 		});
 	};
+}]);
+
+app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', function ($scope, $http, $stateParams, $state) 
+{
+	var code = $stateParams.groupId;
+	console.log(code);
 }]);

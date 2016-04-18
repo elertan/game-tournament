@@ -11,7 +11,7 @@ const apiCall = require('../../../modules/apiCall');
 
 
 // Get all
-router.get('/', function (req, res) {
+router.get('/', isAuth, function (req, res) {
 	apiCall({
 		method: 'get',
 		apiUri: '/groups'
@@ -65,8 +65,14 @@ router.post('/', isAuth, requiredPostParams(['name', 'description', 'userEmails'
 });
 
 // Read
-router.get('/:id', function (req, res) {
-	res.status(200);
+router.get('/:id', isAuth, function (req, res) {
+	console.log('in route');
+	apiCall({
+		method: 'get',
+		apiUri: '/groups/' + req.params.id
+	}, function (err, data) {
+		res.json(data);
+	});
 });
 
 // Update

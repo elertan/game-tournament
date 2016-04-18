@@ -13,4 +13,8 @@ router.get('/create', function (req, res) {
 	res.render('spa/groups/create');
 });
 
+router.get('/show', function (req, res) {
+	res.render('spa/groups/show');
+});
+
 module.exports = router;
