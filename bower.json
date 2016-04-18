@@ -24,6 +24,7 @@
     "angular-ui-router": "^0.2.18",
     "bootstrap": "^3.3.6",
     "angular-jwt": "^0.0.9",
-    "bootstrap-select": "^1.10.0"
+    "bootstrap-select": "^1.10.0",
+    "font-awesome": "^4.6.1"
   }
 }
