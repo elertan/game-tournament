@@ -11,11 +11,17 @@ div(ng-controller="Main")
 			div#navbar.navbar-collapse.collapse
 				ul.nav.navbar-nav
 					li.active
-						a(ui-sref="index") Home
+						a(ui-sref="index")
+							i.fa.fa-home
+							| &nbsp;Home
 					li 
-						a(ui-sref="about") About
+						a(ui-sref="about")
+							i.fa.fa-info
+							| &nbsp;About
 					li
-						a(ui-sref="groups") Groepen
+						a(ui-sref="groups")
+							i.fa.fa-group
+							| &nbsp;Groepen
 				ul.nav.navbar-nav(ng-show="loggedIn")
 					// li
 					// 	a(ui-sref="test") Test
@@ -26,13 +32,22 @@ div(ng-controller="Main")
 						a(ui-sref="auth/register") Register
 					li.dropdown-toggle(ng-show="loggedIn")
 						a(data-toggle="dropdown", role="button", aria-haspopup="true", aria-expanded="false") 
-							| {{ user.firstname + ' ' + user.lastname }}
+							| {{ user.firstname + ' ' + user.lastname }}&nbsp;
 							span.caret
 						ul.dropdown-menu
 							li
-								a(ui-sref="profile/show({ studentNumber: user.studentnumber })") Profiel
+								a(ui-sref="profile/show({ studentNumber: user.studentnumber })")
+									i.fa.fa-user
+									| &nbsp;Profiel
 							li
-								a(ng-click="logout()") Logout 
+								a(ui-sref="profile/inbox")
+									i.fa.fa-inbox
+									| &nbsp;Inbox &nbsp;
+									span.label.label-pill.label-danger(ng-show="true") 1
+							li
+								a(ng-click="logout()")
+									i.fa.fa-sign-out
+									| &nbsp;Logout
 				
 	div.container(style="margin-top: 50px;")
 		block content
