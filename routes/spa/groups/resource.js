@@ -71,6 +71,10 @@ router.post('/', isAuth, requiredPostParams(['name', 'description', 'userIds']),
 // Read
 router.get('/:id', function (req, res) {
 	Group.findOne({ _id: req.params.id }, function (err, group) {
+		if (err) {
+			res.status(500);
+			res.end();
+		}
 		res.json(group);
 	});
 });

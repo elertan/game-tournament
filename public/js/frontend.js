@@ -54,11 +54,15 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInter
 		.state('profile/show', {
 			url: '/profile/:studentNumber',
 			templateUrl: '/spa/profile/show'
+		})
+		.state('inbox', {
+			url: '/inbox',
+			templateUrl: '/spa/inbox'
+		})
+		.state('inbox/show', {
+			url: '/inbox/:id',
+			templateUrl: '/spa/inbox/show'
 		});
-		// .state('about', {
-		// 	url: '/about',
-		// 	templateUrl: '/spa/about'
-		// });
 });
 
 app.factory('CustomHttpInterceptor', ['$q', function ($q) {
@@ -223,7 +227,29 @@ app.controller('ProfileShow', ['$scope', '$http', '$stateParams', '$state', func
 		$scope.profileUser = user;
 	});
 		
-}]);	
+}]);
+
+app.controller('Inbox', ['$scope', '$state', function ($scope, $state) {
+	$scope.msgs = [
+		{
+			sender: 'Patrick Vonk',
+			title: 'Ik zuig harde neger lullen',
+			date: '18 April'
+		},
+		{
+			sender: 'Patrick Vonk Skank',
+			title: 'Ik zuig harde neger lullen die zacht worden',
+			date: '18 April 2019'
+		}
+	];
+	$scope.rowClicked = function ($event) {
+		$state.go('inbox/show', { id: 'LoladASdaweasdsa' });
+	};
+}]);
+
+app.controller('InboxShow', ['$scope', '$state', '$stateParams', function ($scope, $state, $stateParams) {
+	$scope.id = $stateParams.id;
+}]);
 
 app.controller('AuthForgotPassword', ['$scope', '$http', '$state', function ($scope, $http, $state) {
 		$scope.processForm = function () {
