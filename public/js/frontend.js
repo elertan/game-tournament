@@ -384,16 +384,7 @@ app.controller('Groups', ['$scope', '$http', '$state', 'Group', function ($scope
 	
 	$scope.groupMouseClick = function (event, id)
 	{
-		var request = $http({
-			method: 'GET',
-			url: '/spa/groups/resource/' + id,
-		});
-		
-		request.success(function (data) 
-		{	
-			$state.go($state.go('groups/show', {groupId: id}, {}), {reload: true});
-		});
-	
+		$state.go('groups/show', { groupId: id});
 	}
 	
 	$scope.createNew = function () {
@@ -448,6 +439,14 @@ app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function ($
 
 app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', function ($scope, $http, $stateParams, $state) 
 {
-	var code = $stateParams.groupId;
-	console.log(code);
+	var request = $http({
+			method: 'GET',
+			url: '/spa/groups/resource/' + $stateParams.groupId,
+		});
+		
+		request.success(function (data) 
+		{	
+			$scope.group = data;
+			console.log(data);
+		});
 }]);

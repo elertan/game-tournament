@@ -66,7 +66,6 @@ router.post('/', isAuth, requiredPostParams(['name', 'description', 'userEmails'
 
 // Read
 router.get('/:id', isAuth, function (req, res) {
-	console.log('in route');
 	apiCall({
 		method: 'get',
 		apiUri: '/groups/' + req.params.id

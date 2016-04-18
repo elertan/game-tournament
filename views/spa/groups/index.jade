@@ -9,6 +9,6 @@ block content
 			div.col-md-4(ng-repeat="group in groups", style="background: #808080; border-radius: 5px; color: #EEE; margin: 0px; border: 1px solid #000000;", ng-mouseenter="groupMouseEnter($event)", ng-mouseleave="groupMouseLeave($event)", ng-click="groupMouseClick($event, group._id)")
 				div(style="margin: 5px;")
 					h2 {{ group.name }}
-					p(style="font-style: italic;") by {{ group.owner.firstname }} {{ group.owner.lastname }}
+					p(style="font-style: italic;") door {{ group.owner.firstname }} {{ group.owner.lastname }}
 					hr
 					p {{ group.description }}
