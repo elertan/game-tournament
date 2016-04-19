@@ -66,6 +66,10 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInter
 		.state('inbox/show', {
 			url: '/inbox/:id',
 			templateUrl: '/spa/inbox/show'
+		})
+		.state('inbox/create', {
+			url: '/inbox/:id',
+			templateUrl: '/spa/inbox/create'
 		});
 });
 
@@ -247,6 +251,9 @@ app.controller('Inbox', ['$scope', '$state', function ($scope, $state) {
 	];
 	$scope.rowClicked = function ($event) {
 		$state.go('inbox/show', { id: 'LoladASdaweasdsa' });
+	};
+	$scope.addNew = function () {
+		$state.go('inbox/create');
 	};
 }]);
 
