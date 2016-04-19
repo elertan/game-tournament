@@ -6,30 +6,13 @@ const Schema = mongoose.Schema;
 const User = require('./user');
 
 const schema = new Schema({
+	sender: Schema.Types.ObjectId,
+	receiver: Schema.Types.ObjectId,
+	title: String,
 	content: String,
-	senderId: {
-		type: String,
-		required: true
-	},
-	receiverId: {
-		type: String,
-		required: true
-	},
 	updated_at: Date,
 	created_at: Date
 });
-
-schema.methods.getSender = function (cb) {
-	User.findById(this.senderId, function (err, user) {
-		cb(err, user);
-	});
-};
-
-schema.methods.getReceiver = function (cb) {
-	User.findById(this.receiverId, function (err, user) {
-		cb(err, user);
-	});
-};
 
 schema.pre('save', function (next) {
 	if (!this.created_at) {

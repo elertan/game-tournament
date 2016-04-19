@@ -1,0 +1,6 @@
+extends ../main.jade
+
+block content
+	div(ng-controller="GroupShow")
+		h1 Groep: {{ group.name }}
+		h4 Eigenaar: {{ group.owner.email }} 
