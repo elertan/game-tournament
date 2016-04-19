@@ -1,0 +1,20 @@
+extends main.jade
+
+block content
+	div(ng-controller="Inbox")
+		h1(style="float: left;") Inbox
+		button.btn.btn-primary(style="float: right; margin-top: 25px;" ng-click="$state.go('inbox/create')")
+			i.fa.fa-plus
+			| &nbsp;Nieuw 
+		input.form-control(type="text" ng-model="filter" placeholder="Filter...")
+		table.table.table-bordered.table-hover(style="margin-top: 20px;")
+			thead
+				tr
+					th Afzender
+					th Titel
+					th Datum
+			tbody
+				tr(ng-repeat="msg in msgs | filter: filter" ng-click="rowClicked($event)")
+					td {{ msg.sender }}
+					td {{ msg.title }}
+					td {{ msg.date }}
