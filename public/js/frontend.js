@@ -469,7 +469,8 @@ app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function ($
 
 app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group', function ($scope, $http, $stateParams, $state, Group) 
 {
-	var request = $http({
+	var request = $http(
+		{
 			method: 'GET',
 			url: '/spa/groups/resource/' + $stateParams.groupId,
 		});
