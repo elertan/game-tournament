@@ -82,6 +82,9 @@ router.get('/:id', function (req, res) {
 // Update
 router.put('/:id', isAuth, function (req, res) {
 	const form = req.body;
+
+	
+	
 	res.status(200);
 });
 

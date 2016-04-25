@@ -6,8 +6,14 @@ const Schema = mongoose.Schema;
 const User = require('./user');
 
 const schema = new Schema({
-	sender: Schema.Types.ObjectId,
-	receiver: Schema.Types.ObjectId,
+	sender: {
+		type: Schema.Types.ObjectId,
+		ref: 'User'
+	},
+	receiver: {
+		type: Schema.Types.ObjectId,
+		ref: 'User'
+	},
 	title: String,
 	content: String,
 	updated_at: Date,

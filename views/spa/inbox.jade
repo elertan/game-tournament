@@ -3,7 +3,7 @@ extends main.jade
 block content
 	div(ng-controller="Inbox")
 		h1(style="float: left;") Inbox
-		button.btn.btn-primary(style="float: right; margin-top: 25px;" ng-click="$state.go('inbox/create')")
+		button.btn.btn-primary(style="float: right; margin-top: 25px;" ng-click="addNew()")
 			i.fa.fa-plus
 			| &nbsp;Nieuw 
 		input.form-control(type="text" ng-model="filter" placeholder="Filter...")
@@ -14,7 +14,8 @@ block content
 					th Titel
 					th Datum
 			tbody
-				tr(ng-repeat="msg in msgs | filter: filter" ng-click="rowClicked($event)")
-					td {{ msg.sender }}
+				tr(ng-repeat="msg in messages | filter: filter" ng-click="rowClicked(msg._id)")
+					td {{ msg.sender.firstname }} {{ msg.sender.lastname }}
 					td {{ msg.title }}
-					td {{ msg.date }}
+					td {{ msg.date.getDate() }}/{{ msg.date.getMonth() }}/{{ msg.date.getFullYear() }} {{ msg.date.getHours() }}:{{ msg.date.getMinutes() }}
+		p(ng-show="!messages.length" style="text-align: center;") Je hebt geen berichten ontvangen.
