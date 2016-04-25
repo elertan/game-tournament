@@ -7,4 +7,4 @@ block content
 		h4 Eigenaar: {{ group.owner.firstname }} {{ group.owner.lastname }}
 		div(ng-repeat="groupMember in group.users") Groep Leden:
 			a(style = "cursor: pointer;" ng-click="goToGroupMemberProfile(groupMember.studentnumber)") {{ groupMember.firstname }} {{ groupMember.lastname }}
-			a(style = "cursor: pointer;" ng-click="RemoveGroupMember(groupMember.studentnumber)")  Verwijder uit groep
+			a(ng-show="isMe", style = "cursor: pointer;" ng-click="RemoveGroupMember(groupMember.studentnumber)")  Verwijder uit groep

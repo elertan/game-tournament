@@ -87,11 +87,19 @@ app.factory('CustomHttpInterceptor', ['$q', function ($q) {
 }]);
 
 app.factory('Group', function($resource) {
-	return $resource('/spa/groups/resource/:id');
+	return $resource('/spa/groups/resource/:id', { id: '@id' }, {
+		update: {
+			method: 'PUT'
+		}
+	});
 });
 
 app.factory('User', function($resource) {
-	return $resource('/spa/users/resource/:id');
+	return $resource('/spa/users/resource/:id', { id: '@id' }, {
+		update: {
+			method: 'PUT'
+		}
+	});
 });
 
 app.controller('Main', ['$scope', '$state', function ($scope, $state) {
@@ -467,39 +475,28 @@ app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function ($
 	};
 }]);
 
-app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group', function ($scope, $http, $stateParams, $state, Group) 
-{
-	var request = $http(
-		{
-			method: 'GET',
-			url: '/spa/groups/resource/' + $stateParams.groupId,
-		});
-		
-	request.success(function (data) 
-	{	
-		$scope.group = data;
-		
-		if($scope.user.jwt == $scope.group.owner.jwt) 
-		{
+app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group', function ($scope, $http, $stateParams, $state, Group) {
+	Group.get({ id: $stateParams.groupId }, function (group) {
+		$scope.group = group;
+
+		if ($scope.user.jwt == $scope.group.owner.jwt) {
 			$scope.isMe = true;
-		}	
+		}
 	});
 	
-	$scope.goToGroupMemberProfile = function(studentNumber)
-	{
+	$scope.goToGroupMemberProfile = function(studentNumber) {
 		$state.go('profile/show', { studentNumber: studentNumber });
 	}
 	
-	$scope.RemoveGroupMember = function(studentNumber)
-	{
-		var request = $http({
-			method: 'DELETE',
-			url: '/spa/groups/resource/groupMembers/' + studentNumber + '/' + $scope.group._id,
-		});
-		
-		request.success(function (data) 
-		{	
-			$state.go($state.current, {}, {reload: true});	
+	$scope.RemoveGroupMember = function(studentNumber) {
+		for (var i = 0; i < $scope.group.users.length; i++) {
+			if ($scope.group.users[i].studentnumber == studentNumber) {
+				$scope.group.users.splice(i, 1);
+				break;
+			}
+		}
+		Group.update({ id: $scope.group._id }, $scope.group, function () {
+			$state.go($state.current, {}, { reload: true });
 		});
 	}
 }]);

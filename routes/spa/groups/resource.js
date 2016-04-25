@@ -80,9 +80,26 @@ router.get('/:id', isAuth, function (req, res) {
 });
 
 // Update
-router.put('/:id', isAuth, function (req, res) {
-	const form = req.body;
-	res.status(200);
+router.put('/:id', isAuth, function (req, res) {	
+	Group.findOne({ _id: req.body._id }).populate('owner').populate('users').exec(function (err, group) {
+		if (err) {
+			res.status(500);
+			return;
+		}
+		if (!group) {
+			res.status(404);
+			return;
+		}
+
+		group.owner = req.body.owner;
+		group.description = req.body.description;
+		group.name = req.body.name;
+		group.users = req.body.user;
+
+		group.save(function (err) {
+			res.status(200);
+		});
+	});
 });
 
 // Delete
