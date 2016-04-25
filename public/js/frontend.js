@@ -219,7 +219,8 @@ app.controller('ProfileShow', ['$scope', '$http', '$stateParams', '$state', func
 		}
 	});
 	request.success(function (data) {
-		if (data.err) {
+		if (data.err) 
+		{
 			$scope.errorMsg = data.err;
 			$scope.error = true;
 			return;
@@ -227,7 +228,8 @@ app.controller('ProfileShow', ['$scope', '$http', '$stateParams', '$state', func
 		
 		var user = data.user;
 		
-		if($scope.user.jwt == user.jwt) {
+		if($scope.user.jwt == user.jwt) 
+		{
 			$scope.isMe = true;
 		}
 		
@@ -237,18 +239,6 @@ app.controller('ProfileShow', ['$scope', '$http', '$stateParams', '$state', func
 }]);
 
 app.controller('Inbox', ['$scope', '$state', function ($scope, $state) {
-	$scope.msgs = [
-		{
-			sender: 'Patrick Vonk',
-			title: 'Ik zuig harde neger lullen',
-			date: '18 April'
-		},
-		{
-			sender: 'Patrick Vonk Skank',
-			title: 'Ik zuig harde neger lullen die zacht worden',
-			date: '18 April 2019'
-		}
-	];
 	$scope.rowClicked = function ($event) {
 		$state.go('inbox/show', { id: 'LoladASdaweasdsa' });
 	};
@@ -265,7 +255,6 @@ app.controller('AuthForgotPassword', ['$scope', '$http', '$state', function ($sc
 		$scope.processForm = function () {
 			$scope.errorMsg = '';
 			$scope.msg = '';
-			
 			var studentNumber = $scope.studentNumber;
 			
 			var request = $http({
@@ -471,22 +460,45 @@ app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function ($
 			description: $scope.description,
 			userIds: $scope.invitations || []
 		});
+
 		group.$save(function () {
 			$state.go('groups');
 		});
 	};
 }]);
 
-app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', function ($scope, $http, $stateParams, $state) 
+app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group', function ($scope, $http, $stateParams, $state, Group) 
 {
 	var request = $http({
 			method: 'GET',
 			url: '/spa/groups/resource/' + $stateParams.groupId,
 		});
 		
+	request.success(function (data) 
+	{	
+		$scope.group = data;
+		
+		if($scope.user.jwt == $scope.group.owner.jwt) 
+		{
+			$scope.isMe = true;
+		}	
+	});
+	
+	$scope.goToGroupMemberProfile = function(studentNumber)
+	{
+		$state.go('profile/show', { studentNumber: studentNumber });
+	}
+	
+	$scope.RemoveGroupMember = function(studentNumber)
+	{
+		var request = $http({
+			method: 'DELETE',
+			url: '/spa/groups/resource/groupMembers/' + studentNumber + '/' + $scope.group._id,
+		});
+		
 		request.success(function (data) 
 		{	
-			$scope.group = data;
-			console.log(data);
+			$state.go($state.current, {}, {reload: true});	
 		});
+	}
 }]);

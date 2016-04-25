@@ -70,10 +70,9 @@ router.post('/', isAuth, requiredPostParams(['name', 'description', 'userIds']),
 
 // Read
 router.get('/:id', isAuth, function (req, res) {
-	Group.findOne({ _id: req.params.id }, function (err, group) {
+	Group.findOne({ _id: req.params.id }).populate('owner').populate('users').exec(function (err, group) {
 		if (err) {
 			res.status(500);
-			res.end();
 		}
 		res.json(group);
 	});
@@ -86,8 +85,34 @@ router.put('/:id', isAuth, function (req, res) {
 });
 
 // Delete
-router.delete('/:id', isAuth, function (req, res) {
-	res.status(200);
+router.delete('/groupMembers/:studentNumber/:groupId', isAuth, function (req, res) {
+	Group.findOne({ _id: req.params.groupId }).populate('owner').populate('users').exec(function (err, group) {
+		if (err) 
+		{
+			res.status(500);
+		}
+		console.log(group.users);
+		for (var i = 0; i < group.users.length; i++) 
+		{		
+			var groupMember = group.users[i];
+			if (groupMember.studentnumber == req.params.studentNumber) {
+				delete group.users[i];
+				break;
+			}	
+		}
+		
+		console.log(group.users);
+		
+		group.save(function (err) 
+		{
+			if (err) 
+			{
+				res.status(500);
+				return;
+			}
+			res.json({ success: true });
+		});
+	});
 });
 
 module.exports = router;

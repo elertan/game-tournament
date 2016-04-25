@@ -7,7 +7,7 @@ div(ng-controller="Main")
 					span.icon-bar
 					span.icon-bar
 					span.icon-bar
-				a.navbar-brand(ui-sref="/login") Game Tournament
+				a.navbar-brand(ui-sref="index") Game Tournament
 			div#navbar.navbar-collapse.collapse
 				ul.nav.navbar-nav
 					li.active
@@ -23,8 +23,6 @@ div(ng-controller="Main")
 							i.fa.fa-group
 							| &nbsp;Groepen
 				ul.nav.navbar-nav(ng-show="loggedIn")
-					// li
-					// 	a(ui-sref="test") Test
 				ul.nav.navbar-nav.navbar-right
 					li(ng-show="!loggedIn")
 						a(ui-sref="auth/login") Login

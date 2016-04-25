@@ -6,7 +6,7 @@ block content
 		button.btn.btn-success(ng-show="loggedIn", ng-click="createNew()", style="margin-bottom: 20px;") + Maak aan
 		div
 			h2(ng-show="!groups") Er zijn nog geen groepen aangemaakt
-			div.col-md-4(ng-repeat="group in groups", style="background: #808080; border-radius: 5px; color: #EEE; margin: 0px; border: 1px solid #000000;", ng-mouseenter="groupMouseEnter($event)", ng-mouseleave="groupMouseLeave($event)", ng-click="groupMouseClick($event, group._id)")
+			div.col-md-4(ng-repeat="group in groups", style="cursor: pointer; background: #808080; border-radius: 5px; color: #EEE; margin: 0px; border: 1px solid #000000;", ng-mouseenter="groupMouseEnter($event)", ng-mouseleave="groupMouseLeave($event)", ng-click="groupMouseClick($event, group._id)")
 				div(style="margin: 5px;")
 					h2 {{ group.name }}
 					p(style="font-style: italic;") van {{ group.owner.firstname }} {{ group.owner.lastname }}

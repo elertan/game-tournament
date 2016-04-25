@@ -3,4 +3,8 @@ extends ../main.jade
 block content
 	div(ng-controller="GroupShow")
 		h1 Groep: {{ group.name }}
-		h4 Eigenaar: {{ group.owner.email }} 
+		h4 Descriptie {{ group.description }}
+		h4 Eigenaar: {{ group.owner.firstname }} {{ group.owner.lastname }}
+		div(ng-repeat="groupMember in group.users") Groep Leden:
+			a(style = "cursor: pointer;" ng-click="goToGroupMemberProfile(groupMember.studentnumber)") {{ groupMember.firstname }} {{ groupMember.lastname }}
+			a(style = "cursor: pointer;" ng-click="RemoveGroupMember(groupMember.studentnumber)")  Verwijder uit groep
