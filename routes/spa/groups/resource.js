@@ -102,33 +102,23 @@ router.put('/:id', isAuth, function (req, res) {
 });
 
 // Delete
-router.delete('/groupMembers/:studentNumber/:groupId', isAuth, function (req, res) {
-	Group.findOne({ _id: req.params.groupId }).populate('owner').populate('users').exec(function (err, group) {
-		if (err) 
-		{
+router.delete('/:id', isAuth, function (req, res) {
+	var query = Group.findOne({ _id: req.params.id }).exec();
+	query.then((err, group) => {
+		if (err) {
 			res.status(500);
+			return;
 		}
-		console.log(group.users);
-		for (var i = 0; i < group.users.length; i++) 
-		{		
-			var groupMember = group.users[i];
-			if (groupMember.studentnumber == req.params.studentNumber) {
-				delete group.users[i];
-				break;
-			}	
+		if (!group) {
+			res.status(404);
+			return;
 		}
-		
-		console.log(group.users);
-		
-		group.save(function (err) 
-		{
-			if (err) 
-			{
-				res.status(500);
-				return;
-			}
-			res.json({ success: true });
-		});
+		// Delete request user isn't the same as the group owner
+		if (group.owner._id != req.user._doc._id) {
+			res.status(401);
+			return;
+		}
+
 	});
 });
 
