@@ -74,12 +74,13 @@ router.get('/:id', isAuth, function (req, res) {
 		if (err) {
 			res.status(500);
 		}
+		
 		res.json(group);
 	});
 });
 
 // Update
-router.put('/:id', isAuth, function (req, res) {
+router.put('/:id', isAuth, function (req, res) {	
 	Group.findOne({ _id: req.body._id }).populate('owner').populate('users').exec(function (err, group) {
 		if (err) {
 			res.status(500);
