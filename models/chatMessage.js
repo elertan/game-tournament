@@ -7,8 +7,14 @@ const User = require('./user');
 
 const schema = new Schema({
 	content: String,
-	sender: Schema.Types.ObjectId,
-	receiver: Schema.Types.ObjectId,
+	sender: {
+		type: Schema.Types.ObjectId,
+		ref: 'User'
+	},
+	receiver: {
+		type: Schema.Types.ObjectId,
+		ref: 'User'
+	},
 	updated_at: Date,
 	created_at: Date
 });

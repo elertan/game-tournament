@@ -63,4 +63,30 @@ router.post('/', isAuth, requiredPostParams(['title', 'content', 'receiverId']),
 	});
 });
 
+// Delete
+router.delete('/:id', isAuth, function (req, res) {
+	Message.findById(req.params.id, function (err, msg) {
+		if (err) {
+			res.status(500);
+			res.end();
+			return;
+		}
+		if (!msg) {
+			res.status(404);
+			res.end();
+			return;
+		}
+		// User must be the receiver
+		if (msg.receiver != req.user._doc._id) {
+			res.status(401);
+			res.end();
+			return;
+		}
+		msg.remove(function (err) {
+			res.status(200);
+			res.end();
+		});
+	});
+});
+
 module.exports = router;

@@ -5,5 +5,17 @@ block content
 		a(ui-sref="inbox")
 			i.fa.fa-arrow-left
 			| &nbsp;Terug naar inbox
-		div.panel.panel-default(style="margin-top: 20px;")
-			p Test
+		div.jumbotron(style="margin-top: 20px;")
+			p Maak een bericht
+			hr
+			form
+				div.form-group
+					div.inner-addon.left-addon
+						i.fa.fa-header
+						input.form-control(type="text" ng-model="title" placeholder="Titel" required="")
+				div.form-group
+					select.form-control.selectpicker(ng-model="receiver" data-live-search="true" title="Ontvanger" required="")
+						option(ng-repeat="user in users", value="{{ user._id }}") {{ user.firstname }} {{ user.lastname }} - {{ user.studentnumber }}
+				div.form-group
+					textarea.form-control(ng-model="content" placeholder="Bericht" rows="10" required="")
+				input.btn.btn-default(style="float: right;" ng-disabled="!users.length" ng-click="sendMessage()" type="submit" value="Verstuur")

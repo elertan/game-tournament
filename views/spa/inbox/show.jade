@@ -7,6 +7,10 @@ block content
 			| &nbsp;Terug naar inbox
 		div.panel.panel-default(style="margin-top: 20px;")
 			div.panel-heading 
-				| Ik zuig piemels
-				div(style="color: grey; float: right;") verstuurd door Patrick Vonk op 18-04-2016 om 13:40:21
-			div.panel-body
+				| Bericht 
+				div(style="color: grey; float: right;") verstuurd door {{ message.sender.firstname }} {{ message.sender.lastname }} op {{ message.date.getDate() }}/{{ message.date.getMonth() }}/{{ message.date.getFullYear() }} om {{ message.date.getHours() }}:{{ message.date.getMinutes() }}
+			div.panel-body 
+				h3(style="text-align: center; clear: both;") {{ message.title }}
+				hr
+				p(ng-bind-html="message.content")
+		button.btn.btn-danger(ng-click="removeMessage()" style="float: right;") Verwijder Bericht

@@ -63,13 +63,13 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInter
 			url: '/inbox',
 			templateUrl: '/spa/inbox'
 		})
+		.state('inbox/create', {
+			url: '/inbox/create',
+			templateUrl: '/spa/inbox/create'
+		})
 		.state('inbox/show', {
 			url: '/inbox/:id',
 			templateUrl: '/spa/inbox/show'
-		})
-		.state('inbox/create', {
-			url: '/inbox/:id',
-			templateUrl: '/spa/inbox/create'
 		});
 });
 
@@ -100,6 +100,15 @@ app.factory('User', function($resource) {
 			method: 'PUT'
 		}
 	});
+});
+
+app.factory('Message', function($resource) {
+	return $resource('/spa/inbox/resource/:id');
+});
+
+app.factory('ChatMessage', function($resource) {
+	return 0; // NOT IMPLEMENTED
+	// return $resource('/spa/inbox/resource/:id');
 });
 
 app.controller('Main', ['$scope', '$state', function ($scope, $state) {
@@ -246,17 +255,71 @@ app.controller('ProfileShow', ['$scope', '$http', '$stateParams', '$state', func
 		
 }]);
 
-app.controller('Inbox', ['$scope', '$state', function ($scope, $state) {
-	$scope.rowClicked = function ($event) {
-		$state.go('inbox/show', { id: 'LoladASdaweasdsa' });
+app.controller('Inbox', ['$scope', '$state', 'Message', function ($scope, $state, Message) {
+	$scope.messages = [];
+	Message.query(function (messages) {
+		for (var i = messages.length - 1; i >= 0; i--) {
+			messages[i].date = new Date(messages[i].created_at);
+		}
+		$scope.messages = messages;
+	});
+	$scope.rowClicked = function (id) {
+		$state.go('inbox/show', { id: id });
 	};
 	$scope.addNew = function () {
 		$state.go('inbox/create');
 	};
 }]);
 
-app.controller('InboxShow', ['$scope', '$state', '$stateParams', function ($scope, $state, $stateParams) {
-	$scope.id = $stateParams.id;
+app.controller('InboxShow', ['$scope', '$state', '$stateParams', '$sce', 'Message', function ($scope, $state, $stateParams, $sce, Message) {
+	Message.get({ id: $stateParams.id }, function (message) {
+		message.date = new Date(message.created_at);
+
+		// Add in enters
+		message.content = $sce.trustAsHtml(message.content.replace(/\r\n|\r|\n/g, '<br/>'));
+		$scope.message = message;
+	});
+
+	$scope.removeMessage = function () {
+		Message.delete({ id: $scope.message._id }, function () {
+			$state.go('inbox');
+		});
+	};
+}]);
+
+app.controller('InboxCreate', ['$scope', '$state', 'Message', 'User', function ($scope, $state, Message, User) {
+	User.query(function (users) {
+		// remove self from list
+		for (var i = 0; i < users.length; i++) {
+			if (users[i].studentnumber == $scope.user.studentnumber) {
+				users[i] = undefined;
+				break;
+			}
+		}
+		for (var i = 0; i < users.length; i++) {
+			if (users[i] == undefined) {
+				delete users[i];
+				break;
+			}
+		}
+
+		users = users.filter(function (val) { return val; });
+		$scope.users = users;
+	
+		setTimeout(function () { 
+			$('.selectpicker').selectpicker(); 
+		}, 50);
+	});
+
+	$scope.sendMessage = function () {
+		var msg = new Message();
+		msg.title = $scope.title;
+		msg.content = $scope.content;
+		msg.receiverId = $scope.receiver;
+		msg.$save(function (err) {
+			$state.go('inbox');
+		});
+	};
 }]);
 
 app.controller('AuthForgotPassword', ['$scope', '$http', '$state', function ($scope, $http, $state) {

@@ -77,6 +77,8 @@ router.post('/login', requiredPostParams(['password', 'studentnumber']), functio
 								var waitTime = (Math.pow(config.auth.blockedLoginIncremental, blockedUserLogin.timesFailed - config.auth.blockedLoginMaxTries - 1) || 1)  * (config.auth.blockedLoginInitialTime * 100);
 								var blockEndDate = new Date(now.getTime() + waitTime);
 								blockedUserLogin.blockedTillDate = blockEndDate;
+
+								res.json({ err: 'U heeft te vaak een verkeerde inlog poging gehad, u kunt weer over ' + Math.ceil(waitTime / 60 / 100) + ' minuten proberen in te loggen' });
 							} else {
 								res.json({ err: 'Incorrect studentnummer en/of wachtwoord, nog ' + ((config.auth.blockedLoginMaxTries - blockedUserLogin.timesFailed) + 1) + ' poging(en) tot je voor een bepaalde tijd niet kan inloggen' });
 							}
@@ -84,6 +86,10 @@ router.post('/login', requiredPostParams(['password', 'studentnumber']), functio
 						// save it to the database
 						blockedUserLogin.save();
 						return;
+					}
+
+					if (blockedUserLogin) {
+						blockedUserLogin.remove();
 					}
 					
 					const token = jwt.sign(user, config.secret);
@@ -97,31 +103,15 @@ router.post('/login', requiredPostParams(['password', 'studentnumber']), functio
 			return;
 		}
 		
-		// Create next wait time
+		// The blocked time is past
+		if (blockedUserLogin.blockedTillDate && (blockedUserLogin.blockedTillDate.getTime() < now.getTime())) {
+			// FIX ME
+		}
+
 		var waitTime = (Math.pow(config.auth.blockedLoginIncremental, blockedUserLogin.timesFailed - config.auth.blockedLoginMaxTries - 1) || 1)  * (config.auth.blockedLoginInitialTime * 100);
 		
-		if (blockedUserLogin.blockedTillDate && blockedUserLogin.blockedTillDate.getTime() > now.getTime()) {
-			res.json({ err: 'U heeft te vaak een verkeerde inlog poging gehad, u kunt weer over ' + Math.ceil(waitTime / 60 / 100) + ' minuten proberen in te loggen' });
-			return;
-		}
-
-		// Increment failure time
-		blockedUserLogin.timesFailed++;
-
-		// Set the blockEndDate if the fail amount is greater than the max
-		if (blockedUserLogin.timesFailed > config.auth.blockedLoginMaxTries) {
-			var blockEndDate = new Date(now.getTime() + waitTime);
-			blockedUserLogin.blockedTillDate = blockEndDate;
-		}
-		
-		// Give different messages depending on if the login is blocked or not
-		if (blockedUserLogin.blockedTillDate) {
-			res.json({ err: 'U heeft te vaak een verkeerde inlog poging gehad, u kunt weer over ' + Math.ceil(waitTime / 60 / 100) + ' minuten proberen in te loggen' });
-		} else {
-			res.json({ err: 'Incorrect studentnummer en/of wachtwoord, nog ' + ((config.auth.blockedLoginMaxTries - blockedUserLogin.timesFailed) + 1) + ' poging(en) tot je voor een bepaalde tijd niet kan inloggen' });
-		}
-		// Save the block data
-		blockedUserLogin.save();
+		res.json({ err: 'U heeft te vaak een verkeerde inlog poging gehad, u kunt weer over ' + Math.ceil(waitTime / 60 / 100) + ' minuten proberen in te loggen' });
+		return;
 	});
 });
 
