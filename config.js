@@ -5,7 +5,10 @@ module.exports = {
 	site: 'http://www.gametournament.nl:1337',
 	secret: 'patrickvonkzijnpauperprochat',
 	auth: {
-		expirationTime: "9999d" // 7 Days
+		expirationTime: "9999d", // 9999 Days
+		blockedLoginInitialTime: 180, // 3 minutes
+		blockedLoginIncremental: 2.5, // 1.5 times larger each time
+		blockedLoginMaxTries: 3
 	},
 	apiServer: 'http://api.gametournament.nl:1338',
 	database: {
