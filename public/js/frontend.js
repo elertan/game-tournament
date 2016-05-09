@@ -539,19 +539,54 @@ app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function ($
 }]);
 
 app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group', function ($scope, $http, $stateParams, $state, Group) {
+	// The current user has no invitation by the group host/moderator
+	$scope.joinGroupText = 'Toegang tot groep aanvragen';
+
 	Group.get({ id: $stateParams.groupId }, function (group) {
 		$scope.group = group;
 
 		if ($scope.user.jwt == $scope.group.owner.jwt) {
 			$scope.isMe = true;
 		}
+
+		for (var i = $scope.group.invitations.length - 1; i >= 0; i--) {
+			if ($scope.group.invitations[i].user == $scope.user._id) {
+				// The current user has been invited to the group
+				$scope.joinGroupText = 'Groep Uitnodiging Accepteren';
+				$scope.user.hasBeenInvitedToGroup = true;
+			}
+		}
 	});
-	
+
+
 	$scope.goToGroupMemberProfile = function(studentNumber) {
 		$state.go('profile/show', { studentNumber: studentNumber });
 	}
 	
-	$scope.RemoveGroupMember = function(studentNumber) {
+	$scope.groupInvitationClicked = function () {
+		if ($scope.user.hasBeenInvitedToGroup) {
+			// remove invite
+			for (var i = $scope.group.invitations.length - 1; i >= 0; i--) {
+				if ($scope.group.invitations[i].user == $scope.user._id) {
+					delete $scope.group.invitations[i];
+				}
+			}
+			// reindex array
+			$scope.group.invitations.filter(function (val) { return val });
+
+			// add to users list
+			$scope.group.users.push($scope.user);
+		} else {
+			// add join request
+			$scope.group.joinRequests.push({ user: $scope.user._id });
+		}
+
+		$scope.group.save(function (err) {
+			
+		});
+	};
+
+	$scope.removeGroupMember = function(studentNumber) {
 		for (var i = 0; i < $scope.group.users.length; i++) {
 			if ($scope.group.users[i].studentnumber == studentNumber) {
 				$scope.group.users.splice(i, 1);

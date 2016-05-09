@@ -3,8 +3,11 @@
 const express = require('express');
 const router = express.Router();
 
+const mailer = require('../../../modules/mailer');
+
 const User = require('../../../models/user');
 const Group = require('../../../models/group');
+const Message = require('../../../models/message');
 
 const isAuth = require('../../../middleware/isAuth');
 const requiredPostParams = require('../../../middleware/requiredPostParams');
@@ -31,10 +34,10 @@ router.post('/', isAuth, requiredPostParams(['name', 'description', 'userIds']),
 			return;
 		}
 
-		var emails = [];
-		for (var i = 0; i < users.length; i++) {
-			emails.push(users[i].studentnumber + '@mydavinci.nl');
-		}
+		// var emails = [];
+		// for (var i = 0; i < users.length; i++) {
+		// 	emails.push(users[i].studentnumber + '@mydavinci.nl');
+		// }
 
 		apiCall({
 			method: 'post',
@@ -42,8 +45,8 @@ router.post('/', isAuth, requiredPostParams(['name', 'description', 'userIds']),
 			jwt: req.user._doc.jwt,
 			form: {
 				name: req.body.name,
-				description: req.body.description,
-				userEmails: emails
+				description: req.body.description/*,
+				userEmails: emails*/
 			}
 		}, function (err, data) {
 			if (err || data.err) {
@@ -56,7 +59,19 @@ router.post('/', isAuth, requiredPostParams(['name', 'description', 'userIds']),
 			group.name = req.body.name;
 			group.description = req.body.description;
 			group.owner = req.user._doc._id;
-			group.users = req.body.userIds;
+			group.users = [];
+			group.invitations = [];
+
+			for (var i = users.length - 1; i >= 0; i--) {
+				var msg = new Message();
+				msg.sender = req.user._doc._id;
+				msg.receiver = users[i]._id;
+				msg.title = 'Invitation to group ' + group.name;
+				msg.content = 'You have been invited to ' + group.name + '.\n Click the link here to see the group';
+				msg.save(function (err) {});
+				group.invitations.push({ invitationSend: true, user: users[i]._id });
+			}
+
 			group.save(function (err) {
 				if (err) {
 					res.status(500);

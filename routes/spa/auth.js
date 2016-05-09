@@ -3,7 +3,6 @@
 const express = require('express');
 const router = express.Router();
 
-const nodemailer = require('nodemailer');
 const randomstring = require('randomstring');
 const apiCall = require('../../modules/apiCall');
 
@@ -16,10 +15,8 @@ const config = require('../../config');
 const jwt = require('jsonwebtoken');
 const requiredPostParams = require('../../middleware/requiredPostParams.js');
 
-const transporter = nodemailer.createTransport({
-	host: 'localhost',
-	port: 9001
-});
+const mailer = require('../../modules/mailer');
+
 
 // Add routes here
 router.get('/login', function (req, res) {
@@ -165,7 +162,7 @@ router.post('/register', requiredPostParams(['studentnumber']), function (req, r
 					text: 'Beste Leerling,\n\nDruk op deze link om jouw account aan te maken ' + config.site + '/#/auth/register/' + code + '\n\nMet vriendelijke groet,\n\nHet game tournament team'
 				};
 				
-				transporter.sendMail(data, function (err, info) {
+				mailer.sendMail(data, function (err, info) {
 					if (!err) {
 						res.json({ msg: 'Er is een email naar ' + email + ' gestuurd.' });
 					} else {
@@ -230,7 +227,7 @@ router.post('/forgotPassword', requiredPostParams(['studentNumber']), function (
 				text: 'Beste Leerling,\n\nDruk op deze link om jouw wachtwoord te resetten ' + config.site + '/#/auth/forgotPassword/' + code + '\n\nMet vriendelijke groet,\n\nHet game tournament team'
 			};
 
-			transporter.sendMail(data, function (err, info) {
+			mailer.sendMail(data, function (err, info) {
 				if (!err) {
 					res.json({ msg: 'Er is een email naar ' + email + ' gestuurd.' });
 				} else {
