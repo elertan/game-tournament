@@ -544,8 +544,9 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 
 	Group.get({ id: $stateParams.groupId }, function (group) {
 		$scope.group = group;
-
-		if ($scope.user.jwt == $scope.group.owner.jwt) {
+		
+		if ($scope.user.jwt == $scope.group.owner.jwt) 
+		{
 			$scope.isMe = true;
 		}
 
