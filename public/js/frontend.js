@@ -541,9 +541,20 @@ app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function ($
 app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group', function ($scope, $http, $stateParams, $state, Group) {
 	Group.get({ id: $stateParams.groupId }, function (group) {
 		$scope.group = group;
-
-		if ($scope.user.jwt == $scope.group.owner.jwt) {
+		
+		if ($scope.user.jwt == $scope.group.owner.jwt) 
+		{
 			$scope.isMe = true;
+		}
+		
+		for (var i = 0; i < $scope.group.users.length; i++) 
+		{
+			var groupMember = $scope.group.users[i];
+			
+			if ($scope.user.jwt != groupMember.jwt && !$scope.isMe)
+			{
+				$scope.NotAMemberOfThisGroup = true;
+			}
 		}
 	});
 	
