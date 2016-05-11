@@ -23,6 +23,10 @@ div(ng-controller="Main")
 							i.fa.fa-group
 							| &nbsp;Groepen
 				ul.nav.navbar-nav(ng-show="loggedIn")
+					li
+						a(ng-click="showChat()")
+							i.fa.fa-comments
+							| &nbsp;Chats
 				ul.nav.navbar-nav.navbar-right
 					li(ng-show="!loggedIn")
 						a(ui-sref="auth/login") Login

@@ -27,3 +27,135 @@ form div {
 /* add padding  */
 .left-addon input  { padding-left:  30px; }
 .right-addon input { padding-right: 30px; }
+
+.chat-bubble-right {
+	position: relative;
+	max-width: 50%;
+	background: #2D82E7;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	color: #FFF; 
+	font-size: 14px; 
+	padding: 5px; 
+	float: right; 
+	right: 15px; 
+	margin-top: 5px;
+}
+
+.chat-bubble-right p {
+	padding: 5px;
+}
+
+.chat-bubble-right:after {
+	content: '';
+	position: absolute;
+	border-style: solid;
+	border-width: 10px 0 10px 10px;
+	border-color: transparent #2D82E7;
+	display: block;
+	width: 0;
+	z-index: 1;
+	margin-top: -10px;
+	right: -8px;
+	top: 50%;
+}
+
+.chat-bubble-left {
+	position: relative;
+	max-width: 50%;
+	background: #FFF;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	color: #000; 
+	font-size: 14px; 
+	padding: 5px; 
+	float: left;
+	right: 15px; 
+	margin-top: 5px;
+	border: 1px solid #6C6C6C;
+	left: 15px;
+}
+
+.chat-bubble-left p {
+	padding: 5px;
+}
+
+.chat-bubble-header-hr {
+	position: relative;
+	top: -10px;
+	height: 1px;
+	background: #000;
+}
+
+.chat-bubble-left:after {
+	content: '';
+	position: absolute;
+	border-style: solid;
+	border-width: 10px 10px 10px 0;
+	border-color: transparent #FFF;
+	display: block;
+	width: 0;
+	z-index: 1;
+	margin-top: -10px;
+	left: -8px;
+	top: 50%;
+}
+
+.chat-bubble-left:before {
+	content: '';
+	position: absolute;
+	border-style: solid;
+	border-width: 10px 10px 10px 0;
+	border-color: transparent #7F7F7F;
+	display: block;
+	width: 0;
+	z-index: 0;
+	margin-top: -10px;
+	left: -10px;
+	top: 50%;
+}
+
+.chat-bubble-left-header {
+	/*border-bottom: 1px solid #6c6c6c;*/
+}
+
+.chat-menu {
+	position: fixed;
+	display: none;
+	height: 100%;
+	width: 100%;
+	z-index: 9001;
+	left: 0;
+	top: 0;
+	background: rgba(0,0,0, 0.85);
+	overflow-x: hidden; /* Disable horizontal scroll */
+	transition: 0.5s;
+}
+
+.chat-menu i.fa.fa-close {
+	position: fixed;
+	right: 10px;
+	top: 5px;
+	color: #fff;
+	font-size: 36px;
+	transition: 0.2s;
+}
+
+.chat-menu i.fa.fa-close:hover {
+	color: #858585;
+}
+
+.chat-menu-main-hr {
+	position: relative;
+	top: 30px;
+}
+
+.chat-list {
+	position: relative;
+	top: 10px;
+	width: 20%;
+	height: 94%;
+	border: 1px solid #fff;
+}
