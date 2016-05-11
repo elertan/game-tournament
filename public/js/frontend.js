@@ -610,6 +610,13 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 		},
 	];
 	$scope.addMessage = function (msg) {
+		$scope.msg = '';
+
+		// Check if whitespace or spaces only
+		if (/^\s*$/.test(msg)) {
+			return;
+		}
+
 		$scope.messages.push({
 			receiver: 'id',
 			sender: {
