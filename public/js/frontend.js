@@ -541,6 +541,8 @@ app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function ($
 app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group', function ($scope, $http, $stateParams, $state, Group) {
 	// The current user has no invitation by the group host/moderator
 
+	$scope.joinGroupText = 'Aanvraag tot groep verzoeken';
+
 	Group.get({ id: $stateParams.groupId }, function (group) {
 		$scope.group = group;
 		
