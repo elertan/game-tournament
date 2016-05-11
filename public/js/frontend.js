@@ -2,6 +2,8 @@ var app = angular.module('app', ['ui.router', 'angular-jwt', 'ngResource']);
 
 var loadedScripts = [];
 
+
+
 app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInterceptorProvider) {
 	
 	jwtInterceptorProvider.tokenGetter = function () {
@@ -111,10 +113,28 @@ app.factory('ChatMessage', function($resource) {
 	// return $resource('/spa/inbox/resource/:id');
 });
 
+app.directive('myEnter', function () {
+	return function (scope, element, attrs) {
+		element.bind("keydown keypress", function (event) {
+			if(event.which === 13) {
+				scope.$apply(function (){
+					scope.$eval(attrs.myEnter);
+				});
+
+				event.preventDefault();
+			}
+		});
+	};
+});
+
 app.controller('Main', ['$scope', '$state', function ($scope, $state) {
 	if (localStorage.getItem('jwt') != null) {
 		$scope.loggedIn = true;
 		$scope.user = JSON.parse(localStorage.user);
+	}
+
+	$scope.showChat = function () {
+		$('.chat-menu').show();
 	}
 
 	$scope.logout = function () {
@@ -541,6 +561,70 @@ app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function ($
 app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group', function ($scope, $http, $stateParams, $state, Group) {
 	// The current user has no invitation by the group host/moderator
 
+	// ChatMessages.find({ receiver: group._id });
+	$scope.messages = [
+		{
+			receiver: 'id',
+			sender: {
+				isMe: false,
+				firstname: 'Patrick',
+				lastname: 'Vonk'
+			},
+			content: 'Ik suck dicks'
+		},
+		{
+			receiver: 'id',
+			sender: {
+				isMe: false,
+				firstname: 'Sebas',
+				lastname: 'Bakker'
+			},
+			content: 'Ja dat klopt jij vieze d sucka'
+		},
+		{
+			receiver: 'id',
+			sender: {
+				isMe: true,
+				firstname: 'Dennis',
+				lastname: 'Kievits'
+			},
+			content: 'o.o'
+		},
+		{
+			receiver: 'id',
+			sender: {
+				isMe: false,
+				firstname: 'Patrick',
+				lastname: 'Vonk'
+			},
+			content: 'Sebas had op mijn pc getypt'
+		},
+		{
+			receiver: 'id',
+			sender: {
+				isMe: false,
+				firstname: 'Patrick',
+				lastname: 'Vonk'
+			},
+			content: 'Echt super gay'
+		},
+	];
+	$scope.addMessage = function (msg) {
+		$scope.messages.push({
+			receiver: 'id',
+			sender: {
+				isMe: true,
+				firstname: $scope.user.firstname,
+				lastname: $scope.user.lastname
+			},
+			content: msg
+		});
+
+		setTimeout(function () {
+			$('#groupchat-messages').scrollTop($('#groupchat-messages').prop('scrollHeight'));
+		}, 100);
+	};
+
 	$scope.joinGroupText = 'Aanvraag tot groep verzoeken';
 
 	Group.get({ id: $stateParams.groupId }, function (group) {
@@ -613,8 +697,26 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 				break;
 			}
 		}
-		Group.update({ id: $scope.group._id }, $scope.group, function () {
+
+		$scope.group.$update(function () {
 			$state.go($state.current, {}, { reload: true });
 		});
+		// Group.update({ id: $scope.group._id }, $scope.group, function () {
+		// 	$state.go($state.current, {}, { reload: true });
+		// });
 	}
+
+	setTimeout(function () {
+		// SETUP
+		$('#groupchat-messages').scrollTop($('#groupchat-messages').prop('scrollHeight'));
+	}, 100);
+
+	
+}]);
+
+app.controller('ChatMenuController', ['$scope', function ($scope) {
+	var overlay = $('.chat-menu');
+	$scope.close = function () {
+		overlay.hide();
+	};
 }]);

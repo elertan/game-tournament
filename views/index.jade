@@ -8,8 +8,12 @@ html
 		link(rel="stylesheet", href="/public/font-awesome/css/font-awesome.min.css")
 	body(ng-app="app")
 		div(ui-view="")
+		div.chat-menu(ng-controller="ChatMenuController")
+			i.fa.fa-close(ng-click="close()")
+			hr.chat-menu-main-hr
 		script(src="/public/jquery/dist/jquery.min.js")
 		script(src="/public/bootstrap/dist/js/bootstrap.min.js")
+		script(src="/public/jquery-ui/jquery-ui.min.js")
 		script(src="/public/angular/angular.js")
 		script(src="/public/angular-resource/angular-resource.js")
 		script(src="/public/angular-ui-router/release/angular-ui-router.js")
