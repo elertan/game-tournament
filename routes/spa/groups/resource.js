@@ -67,7 +67,7 @@ router.post('/', isAuth, requiredPostParams(['name', 'description', 'userIds']),
 				msg.sender = req.user._doc._id;
 				msg.receiver = users[i]._id;
 				msg.title = 'Invitation to group ' + group.name;
-				msg.content = 'You have been invited to ' + group.name + '.\n Click the link here to see the group';
+				msg.content = 'You have been invited to ' + group.name + '.\n Click the link <a href="/#/groups/show/'+ group._id +'">here</a> to see the group';///groups/show({groupId: '+ group._id +')}
 				msg.save(function (err) {});
 				group.invitations.push({ invitationSend: true, user: users[i]._id });
 			}
@@ -105,14 +105,17 @@ router.put('/:id', isAuth, function (req, res) {
 			res.status(404);
 			return;
 		}
-
+		
 		group.owner = req.body.owner;
 		group.description = req.body.description;
 		group.name = req.body.name;
-		group.users = req.body.user;
-
+		group.users = req.body.users;
+		group.joinRequests = req.body.joinRequests;
+		group.invitations = req.body.invitations;
+	    
 		group.save(function (err) {
 			res.status(200);
+			res.end();
 		});
 	});
 });

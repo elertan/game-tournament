@@ -6,7 +6,7 @@ block content
 			h1 Groep: {{ group.name }}
 			h4 Descriptie {{ group.description }}
 			h4 Eigenaar: {{ group.owner.firstname }} {{ group.owner.lastname }}
-		button.btn.btn-primary(style="float: right; margin-top: 20px;" ng-show="!isMe" ng-click="groupInvitationClicked()") {{ joinGroupText }}
+		button.btn.btn-primary(style="float: right; margin-top: 20px;" ng-show="!isMe && !IsGroupMember" ng-click="groupInvitationClicked()") {{ joinGroupText }}
 		div(style="clear: both;")
 		div(ng-repeat="groupMember in group.users") Groep Leden:
 			a(style = "cursor: pointer;" ng-click="goToGroupMemberProfile(groupMember.studentnumber)") {{ groupMember.firstname }} {{ groupMember.lastname }}

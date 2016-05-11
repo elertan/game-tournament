@@ -540,7 +540,6 @@ app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function ($
 
 app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group', function ($scope, $http, $stateParams, $state, Group) {
 	// The current user has no invitation by the group host/moderator
-	$scope.joinGroupText = 'Toegang tot groep aanvragen';
 
 	Group.get({ id: $stateParams.groupId }, function (group) {
 		$scope.group = group;
@@ -549,9 +548,19 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 		{
 			$scope.isMe = true;
 		}
+		
+		$scope.group.users.forEach(function(groupMember) 
+		{
+			if ($scope.user._id == groupMember._id) 
+			{
+				$scope.IsGroupMember = true;
+			}
+		}, this);
 
-		for (var i = $scope.group.invitations.length - 1; i >= 0; i--) {
-			if ($scope.group.invitations[i].user == $scope.user._id) {
+		for (var i = $scope.group.invitations.length - 1; i >= 0; i--) 
+		{
+			if ($scope.group.invitations[i].user == $scope.user._id) 
+			{
 				// The current user has been invited to the group
 				$scope.joinGroupText = 'Groep Uitnodiging Accepteren';
 				$scope.user.hasBeenInvitedToGroup = true;
@@ -564,26 +573,34 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 		$state.go('profile/show', { studentNumber: studentNumber });
 	}
 	
-	$scope.groupInvitationClicked = function () {
-		if ($scope.user.hasBeenInvitedToGroup) {
+	$scope.groupInvitationClicked = function () 
+	{
+		if ($scope.user.hasBeenInvitedToGroup) 
+		{
 			// remove invite
-			for (var i = $scope.group.invitations.length - 1; i >= 0; i--) {
-				if ($scope.group.invitations[i].user == $scope.user._id) {
-					delete $scope.group.invitations[i];
+			for (var i = $scope.group.invitations.length - 1; i >= 0; i--) 
+			{
+				if ($scope.group.invitations[i].user == $scope.user._id) 
+				{
+					$scope.group.invitations.splice(i, 1);
 				}
 			}
+			
 			// reindex array
 			$scope.group.invitations.filter(function (val) { return val });
-
+			
 			// add to users list
 			$scope.group.users.push($scope.user);
-		} else {
+		} 
+		else 
+		{
 			// add join request
-			$scope.group.joinRequests.push({ user: $scope.user._id });
+			$scope.group.joinRequests.push($scope.user._id);
 		}
-
-		$scope.group.save(function (err) {
-			
+		
+		Group.update({ id: $scope.group._id }, $scope.group, function () 
+		{	
+			$state.go($state.current, {}, { reload: true });	
 		});
 	};
 
