@@ -13,7 +13,6 @@ module.exports = function (req, res, next) {
 			if (ex.message == 'jwt expired') {
 				res.status(401);
 				res.json({ err: 'Jwt Expired', code: "localStorage.removeItem('user'); localStorage.removeItem('jwt');" });
-				return;
 			} else {
 				res.status(401);
 				res.json({ err: 'Unauthorized' });

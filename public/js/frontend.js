@@ -2,8 +2,6 @@ var app = angular.module('app', ['ui.router', 'angular-jwt', 'ngResource']);
 
 var loadedScripts = [];
 
-
-
 app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInterceptorProvider) {
 	
 	jwtInterceptorProvider.tokenGetter = function () {
@@ -75,6 +73,11 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInter
 		});
 });
 
+var socket = io();
+app.factory('Socket', function () {
+	return socket;
+});
+
 app.factory('CustomHttpInterceptor', ['$q', function ($q) {
 	return {
 		response: function (response) {
@@ -87,6 +90,15 @@ app.factory('CustomHttpInterceptor', ['$q', function ($q) {
 		}	
 	};
 }]);
+
+// If logged in, send the data to the socket
+if (localStorage.getItem('jwt')) {
+	socket.emit('login', localStorage.getItem('jwt'), function (err, user) {
+		if (err) {
+
+		}
+	});
+}
 
 app.factory('Group', function($resource) {
 	return $resource('/spa/groups/resource/:id', { id: '@id' }, {
@@ -127,10 +139,16 @@ app.directive('myEnter', function () {
 	};
 });
 
-app.controller('Main', ['$scope', '$state', function ($scope, $state) {
+app.controller('Main', ['$scope', '$state', 'Socket', function ($scope, $state, Socket) {
 	if (localStorage.getItem('jwt') != null) {
 		$scope.loggedIn = true;
 		$scope.user = JSON.parse(localStorage.user);
+
+		Socket.emit('login', localStorage.getItem('jwt'), function (err, user) {
+			if (err) {
+
+			}
+		});
 	}
 
 	$scope.showChat = function () {
@@ -141,6 +159,8 @@ app.controller('Main', ['$scope', '$state', function ($scope, $state) {
 		localStorage.removeItem('jwt');
 		localStorage.removeItem('user');
 		$scope.loggedIn = false;
+
+		Socket.emit('logout');
 		
 		$state.go('index');
 	}
@@ -558,8 +578,21 @@ app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function ($
 	};
 }]);
 
-app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group', function ($scope, $http, $stateParams, $state, Group) {
-	// The current user has no invitation by the group host/moderator
+app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group', 'Socket', function ($scope, $http, $stateParams, $state, Group, Socket) {
+
+	Socket.on('GroupShow/Client/Message/New', function (data) {
+		console.log('New chat msg', data);
+
+		// $scope.messages.push({
+		// 	receiver: $scope.group._id,
+		// 	sender: {
+		// 		isMe: true,
+		// 		firstname: $scope.user.firstname,
+		// 		lastname: $scope.user.lastname
+		// 	},
+		// 	content: msg
+		// });
+	});
 
 	// ChatMessages.find({ receiver: group._id });
 	$scope.messages = [
@@ -617,18 +650,15 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 			return;
 		}
 
-		$scope.messages.push({
-			receiver: 'id',
-			sender: {
-				isMe: true,
-				firstname: $scope.user.firstname,
-				lastname: $scope.user.lastname
-			},
-			content: msg
+		socket.emit('GroupShow/Message/New', { 
+			receiver: $scope.group._id, 
+			sender: $scope.user._id,
+			content: msg 
 		});
 
 		setTimeout(function () {
-			$('#groupchat-messages').scrollTop($('#groupchat-messages').prop('scrollHeight'));
+			var messagesDiv = $('#groupchat-messages');
+			messagesDiv.scrollTop(messagesDiv.prop('scrollHeight'));
 		}, 100);
 	};
 
@@ -659,6 +689,9 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 				$scope.user.hasBeenInvitedToGroup = true;
 			}
 		}
+
+		// Join group chat
+		Socket.emit('GroupShow/Message/JoinGroup', $scope.group._id);
 	});
 
 
@@ -714,8 +747,11 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 	}
 
 	setTimeout(function () {
-		// SETUP
-		$('#groupchat-messages').scrollTop($('#groupchat-messages').prop('scrollHeight'));
+		// Setup
+		var messagesDiv = $('#groupchat-messages');
+
+		// Scroll down to the latest message
+		messagesDiv.scrollTop(messagesDiv.prop('scrollHeight'));
 	}, 100);
 
 	

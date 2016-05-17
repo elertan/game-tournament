@@ -18,11 +18,11 @@ div(ng-controller="Main")
 						a(ui-sref="about")
 							i.fa.fa-info
 							| &nbsp;Over Ons
+				ul.nav.navbar-nav(ng-show="loggedIn")
 					li
 						a(ui-sref="groups")
 							i.fa.fa-group
 							| &nbsp;Groepen
-				ul.nav.navbar-nav(ng-show="loggedIn")
 					li
 						a(ng-click="showChat()")
 							i.fa.fa-comments
