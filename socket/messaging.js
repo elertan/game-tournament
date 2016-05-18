@@ -3,7 +3,7 @@
 module.exports = function (io, socket) {
 	socket.on('GroupShow/Message/JoinGroup', groupId => {
 
-		// Leave any previous group chats
+		//Leave any previous group chats
 		for (var prop in io.sockets.adapter.sids[socket.id]) {
 			if (io.sockets.adapter.sids[socket.id].hasOwnProperty(prop)) {
 				if (prop.indexOf('GroupShow/') > -1) {
@@ -13,7 +13,7 @@ module.exports = function (io, socket) {
 			}
 		}
 		
-		socket.join('GroupShow/' + groupId);
+		socket.join('GroupShow/' + groupId); // GroupShow/asd2348masdasd
 	});
 
     socket.on('GroupShow/Message/New', data => {
