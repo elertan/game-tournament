@@ -85,7 +85,7 @@ router.post('/', isAuth, requiredPostParams(['name', 'description', 'userIds']),
 
 // Read
 router.get('/:id', isAuth, function (req, res) {
-	Group.findOne({ _id: req.params.id }).populate('owner').populate('users').exec(function (err, group) {
+	Group.findOne({ _id: req.params.id }).populate('owner').populate('users').populate('joinRequests').exec(function (err, group) {
 		if (err) {
 			res.status(500);
 		}

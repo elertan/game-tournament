@@ -561,6 +561,11 @@ app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function ($
 app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group', function ($scope, $http, $stateParams, $state, Group) {
 	// The current user has no invitation by the group host/moderator
 
+	$scope.groupManageClicked = function()
+	{
+		$state.go('inbox', { });
+	};
+	
 	// ChatMessages.find({ receiver: group._id });
 	$scope.messages = [
 		{
@@ -570,7 +575,7 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 				firstname: 'Patrick',
 				lastname: 'Vonk'
 			},
-			content: 'Ik suck dicks'
+			content: 'Hallo'
 		},
 		{
 			receiver: 'id',
@@ -579,7 +584,7 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 				firstname: 'Sebas',
 				lastname: 'Bakker'
 			},
-			content: 'Ja dat klopt jij vieze d sucka'
+			content: 'Kom Ploes'
 		},
 		{
 			receiver: 'id',
@@ -606,7 +611,7 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 				firstname: 'Patrick',
 				lastname: 'Vonk'
 			},
-			content: 'Echt super gay'
+			content: 'markr'
 		},
 	];
 	$scope.addMessage = function (msg) {
@@ -632,10 +637,9 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 		}, 100);
 	};
 
-	$scope.joinGroupText = 'Aanvraag tot groep verzoeken';
-
 	Group.get({ id: $stateParams.groupId }, function (group) {
 		$scope.group = group;
+		$scope.joinGroupText = 'Aanvraag tot groep verzoeken';
 		
 		if ($scope.user.jwt == $scope.group.owner.jwt) 
 		{
@@ -659,8 +663,39 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 				$scope.user.hasBeenInvitedToGroup = true;
 			}
 		}
+		
+		for (var i = $scope.group.joinRequests.length - 1; i >= 0; i--) 
+		{
+			console.log($scope.group.joinRequests[i]);
+			if ($scope.group.joinRequests[i]._id != $scope.user._id) 
+			{
+				// The current user has been invited to the group
+				$scope.hasSendJoinRequest = false;
+			}
+			else
+			{
+				$scope.hasSendJoinRequest = true;
+			}
+		}
 	});
 
+    $scope.AcceptJoinRequest = function(joinRequest)
+	{		
+		for (var i = $scope.group.joinRequests.length - 1; i >= 0; i--) 
+		{
+			if ($scope.group.joinRequests[i]._id == joinRequest) 
+			{
+				$scope.group.users.push(joinRequest._id);
+				$scope.group.joinRequests.splice(i, 1);
+				break;
+			}
+		}
+		
+		Group.update({ id: $scope.group._id }, $scope.group, function () 
+		{	
+			$state.go($state.current, {}, { reload: true });	
+		});	
+	}
 
 	$scope.goToGroupMemberProfile = function(studentNumber) {
 		$state.go('profile/show', { studentNumber: studentNumber });
