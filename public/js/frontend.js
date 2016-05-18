@@ -678,7 +678,7 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 			}
 		}
 	});
-
+//mark
     $scope.AcceptJoinRequest = function(joinRequest)
 	{		
 		for (var i = $scope.group.joinRequests.length - 1; i >= 0; i--) 
