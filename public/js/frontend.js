@@ -53,6 +53,10 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInter
 			url: '/groups/show/:groupId',
 			templateUrl: '/spa/groups/show'
 		})
+		.state('group/manage', {
+			url: '/groups/manage/:groupId',
+			templateUrl: '/spa/groups/manage'
+		})
 		.state('groups/create', {
 			url: '/groups/create',
 			templateUrl: '/spa/groups/create'
@@ -563,7 +567,7 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 
 	$scope.groupManageClicked = function()
 	{
-		$state.go('inbox', { });
+		$state.go('group/manage', { groupId: $scope.group._id });
 	};
 	
 	// ChatMessages.find({ receiver: group._id });
@@ -666,7 +670,6 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 		
 		for (var i = $scope.group.joinRequests.length - 1; i >= 0; i--) 
 		{
-			console.log($scope.group.joinRequests[i]);
 			if ($scope.group.joinRequests[i]._id != $scope.user._id) 
 			{
 				// The current user has been invited to the group
@@ -678,24 +681,6 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 			}
 		}
 	});
-//mark
-    $scope.AcceptJoinRequest = function(joinRequest)
-	{		
-		for (var i = $scope.group.joinRequests.length - 1; i >= 0; i--) 
-		{
-			if ($scope.group.joinRequests[i]._id == joinRequest) 
-			{
-				$scope.group.users.push(joinRequest._id);
-				$scope.group.joinRequests.splice(i, 1);
-				break;
-			}
-		}
-		
-		Group.update({ id: $scope.group._id }, $scope.group, function () 
-		{	
-			$state.go($state.current, {}, { reload: true });	
-		});	
-	}
 
 	$scope.goToGroupMemberProfile = function(studentNumber) {
 		$state.go('profile/show', { studentNumber: studentNumber });
@@ -732,20 +717,21 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 		});
 	};
 
-	$scope.removeGroupMember = function(studentNumber) {
-		for (var i = 0; i < $scope.group.users.length; i++) {
-			if ($scope.group.users[i].studentnumber == studentNumber) {
+	$scope.removeGroupMember = function(studentNumber) 
+	{
+		for (var i = 0; i < $scope.group.users.length; i++) 
+		{
+			if ($scope.group.users[i].studentnumber == studentNumber) 
+			{
 				$scope.group.users.splice(i, 1);
 				break;
 			}
 		}
-
-		$scope.group.$update(function () {
-			$state.go($state.current, {}, { reload: true });
-		});
-		// Group.update({ id: $scope.group._id }, $scope.group, function () {
-		// 	$state.go($state.current, {}, { reload: true });
-		// });
+		
+		Group.update({ id: $scope.group._id }, $scope.group, function () 
+		{	
+			$state.go($state.current, {}, { reload: true });	
+		});	
 	}
 
 	setTimeout(function () {
@@ -756,6 +742,77 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 	
 }]);
 
+app.controller('GroupManage', ['$scope', '$http', '$stateParams', '$state', 'Group', 'User', function ($scope, $http, $stateParams, $state, Group, User) {
+	
+	$scope.goToGroupMemberProfile = function(studentNumber) 
+	{
+		$state.go('profile/show', { studentNumber: studentNumber });
+	}
+	
+	User.query(function (users) 
+	{		
+		users = users.filter(function (val) { return val; });
+		$scope.users = users;
+		
+		setTimeout(function () { 
+			$('.selectpicker').selectpicker(); 
+		}, 50);
+	});
+	
+	Group.get({ id: $stateParams.groupId }, function (group) 
+	{
+		$scope.group = group;
+		
+		if ($scope.user.jwt == $scope.group.owner.jwt) 
+		{
+			$scope.isMe = true;
+		}
+		else
+		{
+			$state.go('groups/show', { groupId: id});
+		}
+		
+		$scope.AcceptJoinRequest = function(joinRequest)
+		{		
+			for (var i = $scope.group.joinRequests.length - 1; i >= 0; i--) 
+			{
+				if ($scope.group.joinRequests[i]._id == joinRequest) 
+				{
+					$scope.group.users.push(joinRequest);
+					$scope.group.joinRequests.splice(i, 1);
+					break;
+				}
+			}
+			
+			Group.update({ id: $scope.group._id }, $scope.group, function () 
+			{	
+				$state.go($state.current, {}, { reload: true });	
+			});	
+		}
+		
+		$scope.RemoveGroupMember = function(studentNumber) 
+		{
+			for (var i = 0; i < $scope.group.users.length; i++) 
+			{
+				if ($scope.group.users[i].studentnumber == studentNumber) 
+				{
+					$scope.group.users.splice(i, 1);
+					break;
+				}
+			}
+			
+			Group.update({ id: $scope.group._id }, $scope.group, function () 
+			{	
+				$state.go($state.current, {}, { reload: true });	
+			});	
+		}
+		
+		$scope.groupShowClicked = function()
+		{
+			$state.go('groups/show', { groupId: $scope.group._id});
+		}
+	});	
+}]);
 app.controller('ChatMenuController', ['$scope', function ($scope) {
 	var overlay = $('.chat-menu');
 	$scope.close = function () {

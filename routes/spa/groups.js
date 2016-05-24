@@ -17,4 +17,8 @@ router.get('/show', function (req, res) {
 	res.render('spa/groups/show');
 });
 
+router.get('/manage', function (req, res) {
+	res.render('spa/groups/manage');
+});
+
 module.exports = router;
