@@ -143,12 +143,6 @@ app.controller('Main', ['$scope', '$state', 'Socket', function ($scope, $state, 
 	if (localStorage.getItem('jwt') != null) {
 		$scope.loggedIn = true;
 		$scope.user = JSON.parse(localStorage.user);
-
-		Socket.emit('login', localStorage.getItem('jwt'), function (err, user) {
-			if (err) {
-
-			}
-		});
 	}
 
 	$scope.showChat = function () {
@@ -166,7 +160,7 @@ app.controller('Main', ['$scope', '$state', 'Socket', function ($scope, $state, 
 	}
 }]);
 
-app.controller('AuthLogin', ['$scope', '$http', '$state', function ($scope, $http, $state) {
+app.controller('AuthLogin', ['$scope', '$http', '$state', 'Socket', function ($scope, $http, $state, Socket) {
 		
 		if (window.localStorage.jwt) {
 			$state.go('index');
@@ -196,6 +190,13 @@ app.controller('AuthLogin', ['$scope', '$http', '$state', function ($scope, $htt
 				
 				window.localStorage.jwt = data.token;
 				window.localStorage.user = JSON.stringify(data.user);
+
+				Socket.emit('login', localStorage.getItem('jwt'), function (err, user) {
+					if (err) {
+
+					}
+				});
+
 				$state.go('index');
 			});
 		};
@@ -580,53 +581,32 @@ app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function ($
 
 app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group', 'Socket', function ($scope, $http, $stateParams, $state, Group, Socket) {
 
-	Socket.on('GroupShow/Client/Message/New', function (data) {
-		console.log('New chat msg', data);
-
-		// $scope.messages.push({
-		// 	receiver: $scope.group._id,
-		// 	sender: {
-		// 		isMe: true,
-		// 		firstname: $scope.user.firstname,
-		// 		lastname: $scope.user.lastname
-		// 	},
-		// 	content: msg
-		// });
-	});
-
 	// ChatMessages.find({ receiver: group._id });
 	$scope.messages = [
 		{
 			receiver: 'id',
 			sender: {
-				isMe: false,
 				firstname: 'Patrick',
 				lastname: 'Vonk'
 			},
-			content: 'Ik suck dicks'
+			content: 'Ik ben super slecht in overwatch'
 		},
 		{
 			receiver: 'id',
 			sender: {
-				isMe: false,
 				firstname: 'Sebas',
 				lastname: 'Bakker'
 			},
-			content: 'Ja dat klopt jij vieze d sucka'
+			content: 'Ja dat klopt daarom speel jij draven'
+		},
+		{
+			receiver: 'id',
+			sender: $scope.user,
+			content: 'ok lol'
 		},
 		{
 			receiver: 'id',
 			sender: {
-				isMe: true,
-				firstname: 'Dennis',
-				lastname: 'Kievits'
-			},
-			content: 'o.o'
-		},
-		{
-			receiver: 'id',
-			sender: {
-				isMe: false,
 				firstname: 'Patrick',
 				lastname: 'Vonk'
 			},
@@ -635,13 +615,28 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 		{
 			receiver: 'id',
 			sender: {
-				isMe: false,
 				firstname: 'Patrick',
 				lastname: 'Vonk'
 			},
-			content: 'Echt super gay'
+			content: 'Ik vind dit super onvolwassen'
 		},
 	];
+
+	var messagesDiv = $('#groupchat-messages');
+	$scope.$watch(function () {
+		return messagesDiv.prop('scrollHeight');
+	}, function () {
+		setTimeout(function () {
+			messagesDiv.scrollTop(messagesDiv.prop('scrollHeight'));
+		}, 50);
+	});
+
+	Socket.on('GroupShow/Client/Message/New', function (data) {
+		console.log('New chat msg', data);
+
+		$scope.messages.push(data); 
+	});
+
 	$scope.addMessage = function (msg) {
 		$scope.msg = '';
 
@@ -652,14 +647,9 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 
 		socket.emit('GroupShow/Message/New', { 
 			receiver: $scope.group._id, 
-			sender: $scope.user._id,
+			sender: $scope.user,
 			content: msg 
 		});
-
-		setTimeout(function () {
-			var messagesDiv = $('#groupchat-messages');
-			messagesDiv.scrollTop(messagesDiv.prop('scrollHeight'));
-		}, 100);
 	};
 
 	$scope.joinGroupText = 'Aanvraag tot groep verzoeken';
@@ -745,16 +735,6 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 		// 	$state.go($state.current, {}, { reload: true });
 		// });
 	}
-
-	setTimeout(function () {
-		// Setup
-		var messagesDiv = $('#groupchat-messages');
-
-		// Scroll down to the latest message
-		messagesDiv.scrollTop(messagesDiv.prop('scrollHeight'));
-	}, 100);
-
-	
 }]);
 
 app.controller('ChatMenuController', ['$scope', function ($scope) {
