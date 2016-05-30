@@ -1,0 +1,17 @@
+extends ../main.jade
+
+block content
+	div(ng-controller="GroupChat")
+		include ../groups/templates/groupNavigation.jade
+		h3 Group Chat of {{ group.name }}
+		div#groupchat(style="height: 600px; box-shadow: 0px 0px 5px 3px rgba(0,0,0,0.25);")
+			div#groupchat-messages(style="height: 560px; overflow-x: hidden; padding: 5px;")
+				div(style="clear: both;" ng-repeat="message in messages")
+					div(ng-class="{ 'chat-bubble-right': message.sender._id == user._id, 'chat-bubble-left': message.sender._id != user._id }")
+						div.chat-bubble-left-header(ng-show="message.sender._id != user._id")
+							p {{ message.sender.firstname }} {{ message.sender.lastname }}
+							div.chat-bubble-header-hr
+						p(ng-bind-html="message.content")
+			div(style="height: 50px; background: #2D82E7;")
+				input(type="text" style="float: left; margin: 10px; height: 30px; width: 76%;" ng-model="msg" my-enter="addMessage(msg)")
+				button.btn.btn-default(style="float: right; margin: 8px; width: 18%;" ng-click="addMessage(msg)") Verzenden

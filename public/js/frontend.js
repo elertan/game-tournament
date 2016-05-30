@@ -1,4 +1,4 @@
-var app = angular.module('app', ['ui.router', 'angular-jwt', 'ngResource']);
+var app = angular.module('app', ['ui.router', 'angular-jwt', 'ngResource', 'ngSanitize']);
 
 var loadedScripts = [];
 
@@ -54,6 +54,10 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInter
 		.state('group/manage', {
 			url: '/groups/manage/:groupId',
 			templateUrl: '/spa/groups/manage'
+		})
+		.state('group/chat', {
+			url: '/groups/chat/:groupId',
+			templateUrl: '/spa/groups/chat'
 		})
 		.state('groups/create', {
 			url: '/groups/create',
@@ -124,9 +128,17 @@ app.factory('Message', function($resource) {
 	return $resource('/spa/inbox/resource/:id');
 });
 
-app.factory('ChatMessage', function($resource) {
-	return 0; // NOT IMPLEMENTED
-	// return $resource('/spa/inbox/resource/:id');
+app.factory('ChatMessage', function($resource, $http) {
+	var resource = $resource('/spa/chatMessage/resource/:id');
+
+	// Adding extensions methods to allow complex data quering
+	resource.$extensions = {};
+	resource.$extensions.findAllByReceiver = function (id) {
+		var promise = $http.post('/spa/chatMessage/resource/findAllByReceiver', id);
+		return promise;
+	};
+
+	return resource;
 });
 
 app.directive('myEnter', function () {
@@ -585,80 +597,12 @@ app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function ($
 
 app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group', 'Socket', function ($scope, $http, $stateParams, $state, Group, Socket) {
 
-	$scope.groupManageClicked = function()
-	{
+	$scope.groupManageClicked = function() {
 		$state.go('group/manage', { groupId: $scope.group._id });
 	};
 	
-	// ChatMessages.find({ receiver: group._id });
-	$scope.messages = [
-		{
-			receiver: 'id',
-			sender: {
-				firstname: 'Patrick',
-				lastname: 'Vonk'
-			},
-			content: 'Ik ben super slecht in overwatch'
-		},
-		{
-			receiver: 'id',
-			sender: {
-				firstname: 'Sebas',
-				lastname: 'Bakker'
-			},
-			content: 'Kom Ploes'
-		},
-		{
-			receiver: 'id',
-			sender: $scope.user,
-			content: 'ok lol'
-		},
-		{
-			receiver: 'id',
-			sender: {
-				firstname: 'Patrick',
-				lastname: 'Vonk'
-			},
-			content: 'Sebas had op mijn pc getypt'
-		},
-		{
-			receiver: 'id',
-			sender: {
-				firstname: 'Patrick',
-				lastname: 'Vonk'
-			},
-			content: 'markr'
-		},
-	];
-
-	var messagesDiv = $('#groupchat-messages');
-	$scope.$watch(function () {
-		return messagesDiv.prop('scrollHeight');
-	}, function () {
-		setTimeout(function () {
-			messagesDiv.scrollTop(messagesDiv.prop('scrollHeight'));
-		}, 50);
-	});
-
-	Socket.on('GroupShow/Client/Message/New', function (data) {
-		console.log('New chat msg', data);
-
-		$scope.messages.push(data); 
-	});
-
-	$scope.addMessage = function (msg) {
-		$scope.msg = '';
-
-		// Check if whitespace or spaces only
-		if (/^\s*$/.test(msg)) {
-			return;
-		}
-
-		socket.emit('GroupShow/Message/New', { 
-			receiver: $scope.group._id, 
-			sender: $scope.user,
-			content: msg 
-		});
+	$scope.groupChatClicked = function () {
+		$state.go('group/chat', { groupId: $scope.group._id });
 	};
 
 	Group.get({ id: $stateParams.groupId }, function (group) {
@@ -667,7 +611,7 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 		
 		if ($scope.user.jwt == $scope.group.owner.jwt) 
 		{
-			$scope.isMe = true;
+			$scope.isGroupOwner = true;
 		}
 		
 		$scope.group.users.forEach(function(groupMember) 
@@ -731,8 +675,7 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 			$scope.group.joinRequests.push($scope.user._id);
 		}
 		
-		Group.update({ id: $scope.group._id }, $scope.group, function () 
-		{	
+		Group.update({ id: $scope.group._id }, $scope.group, function () {	
 			$state.go($state.current, {}, { reload: true });	
 		});
 	};
@@ -755,15 +698,123 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 	}
 }]);
 
+app.controller('GroupChat', ['$scope', '$stateParams', '$state', 'Group', 'User', 'Socket', 'ChatMessage', function ($scope, $stateParams, $state, Group, User, Socket, ChatMessage) {
+	
+	$scope.groupManageClicked = function () {
+		$state.go('group/manage', { groupId: $scope.group._id });
+	};
+	
+	$scope.groupShowClicked = function () {
+		$state.go('groups/show', { groupId: $scope.group._id });
+	};
+
+	var messagesDiv = $('#groupchat-messages');
+	$scope.$watch(function () {
+		return messagesDiv.prop('scrollHeight');
+	}, function () {
+		setTimeout(function () {
+			messagesDiv.scrollTop(messagesDiv.prop('scrollHeight'));
+		}, 50);
+	});
+
+	Socket.on('GroupChat/Client/Message/New', function (data) {
+		console.log('New chat msg', data);
+
+		$scope.$apply(function () {
+			$scope.messages.push(data);
+		});
+	});
+
+	Socket.on('GroupChat/Client/Message/Edit', function (msgId, content) {
+		console.log("Edit here: ", msgId, content);
+		for (var i = 0; i < $scope.messages.length; i++) {
+			if ($scope.messages[i]._id == msgId) {
+				$scope.$apply(function () {
+					$scope.messages[i].content = content;
+				});
+			}
+		}
+	});
+
+	$scope.addMessage = function (msg) {
+		$scope.msg = '';
+
+		// Check if whitespace or spaces only
+		if (/^\s*$/.test(msg)) {
+			return;
+		}
+
+		socket.emit('GroupChat/Message/New', { 
+			receiver: $scope.group._id, 
+			sender: $scope.user,
+			content: msg 
+		});
+	};
+	
+	Group.get({ id: $stateParams.groupId }, function (group) {
+		$scope.group = group;
+
+		$scope.messages = [];
+		ChatMessage.$extensions.findAllByReceiver({ id: group._id })
+		.then(function (res) {
+			$scope.messages = res.data;
+		}, function (res) {
+			console.log(res);
+		});
+		// ChatMessage.get({ receiver: $scope.group._id }, function (messages) {
+		// 	console.log(messages);
+		// 	$scope.messages = messages;
+		// });
+		
+		if ($scope.user.jwt == $scope.group.owner.jwt) 
+		{
+			$scope.isGroupOwner = true;
+		}
+		
+		$scope.group.users.forEach(function(groupMember) 
+		{
+			if ($scope.user._id == groupMember._id) 
+			{
+				$scope.IsGroupMember = true;
+			}
+		}, this);
+
+		for (var i = $scope.group.invitations.length - 1; i >= 0; i--) 
+		{
+			if ($scope.group.invitations[i].user == $scope.user._id) 
+			{
+				// The current user has been invited to the group
+				$scope.user.hasBeenInvitedToGroup = true;
+			}
+		}
+
+		for (var i = $scope.group.joinRequests.length - 1; i >= 0; i--) 
+		{
+			if ($scope.group.joinRequests[i]._id != $scope.user._id) 
+			{
+				// The current user has been invited to the group
+				$scope.hasSendJoinRequest = false;
+			}
+			else
+			{
+				$scope.hasSendJoinRequest = true;
+			}
+		}
+	});
+	
+}]);
+
 app.controller('GroupManage', ['$scope', '$http', '$stateParams', '$state', 'Group', 'User', function ($scope, $http, $stateParams, $state, Group, User) {
 	
-	$scope.goToGroupMemberProfile = function(studentNumber) 
-	{
+	$scope.goToGroupMemberProfile = function(studentNumber) {
 		$state.go('profile/show', { studentNumber: studentNumber });
-	}
+	};
 	
-	User.query(function (users) 
-	{		
+	$scope.groupChatClicked = function () {
+		$state.go('group/chat', { groupId: $scope.group._id });
+	};
+	
+	User.query(function (users) {		
 		users = users.filter(function (val) { return val; });
 		$scope.users = users;
 		
@@ -778,15 +829,44 @@ app.controller('GroupManage', ['$scope', '$http', '$stateParams', '$state', 'Gro
 		
 		if ($scope.user.jwt == $scope.group.owner.jwt) 
 		{
-			$scope.isMe = true;
+			$scope.isGroupOwner = true;
 		}
 		else
 		{
 			$state.go('groups/show', { groupId: id});
 		}
 		
-		$scope.AcceptJoinRequest = function(joinRequest)
-		{		
+		$scope.group.users.forEach(function(groupMember) 
+		{
+			if ($scope.user._id == groupMember._id) 
+			{
+				$scope.IsGroupMember = true;
+			}
+		}, this);
+
+		for (var i = $scope.group.invitations.length - 1; i >= 0; i--) 
+		{
+			if ($scope.group.invitations[i].user == $scope.user._id) 
+			{
+				// The current user has been invited to the group
+				$scope.user.hasBeenInvitedToGroup = true;
+			}
+		}
+
+		for (var i = $scope.group.joinRequests.length - 1; i >= 0; i--) 
+		{
+			if ($scope.group.joinRequests[i]._id != $scope.user._id) 
+			{
+				// The current user has been invited to the group
+				$scope.hasSendJoinRequest = false;
+			}
+			else
+			{
+				$scope.hasSendJoinRequest = true;
+			}
+		}
+		
+		$scope.AcceptJoinRequest = function(joinRequest) {		
 			for (var i = $scope.group.joinRequests.length - 1; i >= 0; i--) 
 			{
 				if ($scope.group.joinRequests[i]._id == joinRequest) 
@@ -822,7 +902,7 @@ app.controller('GroupManage', ['$scope', '$http', '$stateParams', '$state', 'Gro
 		
 		$scope.groupShowClicked = function()
 		{
-			$state.go('groups/show', { groupId: $scope.group._id});
+			$state.go('groups/show', { groupId: $scope.group._id });
 		}
 	});	
 }]);

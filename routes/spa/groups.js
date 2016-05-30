@@ -21,4 +21,8 @@ router.get('/manage', function (req, res) {
 	res.render('spa/groups/manage');
 });
 
+router.get('/chat', function (req, res) {
+	res.render('spa/groups/chat');
+});
+
 module.exports = router;
