@@ -1,5 +1,7 @@
  'use strict';
 
+const co = require('co');
+
 const express = require('express');
 const router = express.Router();
 
@@ -12,85 +14,77 @@ const Group = require('../../../models/group');
 
 // Complex querying
 router.post('/findAllByReceiver', isAuth, (req, res) => {
-	console.log('Id: ', req.body);
+	co(function *() {
+		// Make sure the query is an object
+		if (typeof(req.body.id) != 'string') {
+			res.status(400);
+			res.end('Post data must be an object with an id string');
+			return;
+		}
 
-	// Make sure the query is an object
-	if (typeof(req.body.id) != 'string') {
-		res.status(400);
-		res.end('Post data must be an object with an id string');
-		return;
-	}
+		// Find all chat messages by receiver and fill in the sender key with its referenced User
+		const messages = yield ChatMessage.find({ receiver: req.body.id }).populate('sender').exec();
 
-	// Find all chat messages by receiver
-	ChatMessage.find({ receiver: req.body.id }).populate('sender').exec((err, messages) => {
+		// Check if sender or receiver or group you are in is you (security)
+		const groups = yield Group.find({});
+		for (var i = 0; i < groups.length; i++) {
+			var group = groups[i];
+			// Is the receiver an group, if so check if the groups users/owner is in there
+			if (group._id == req.body.id) {
+				// Is the group owner the requester
+				if (group.owner == req.user._doc._id) {
+					res.json(messages);
+					return;
+				}
+				for (var x = 0; x < group.users.length; x++) {
+					var user = group.users[x];
+					// Is one of the users the requester
+					if (user == req.user._doc._id) {
+						res.json(messages);
+						return;		
+					}
+				}
+			}
+
+			// Is the receiver the user
+			if (req.user._doc._id == req.body.id) {
+				res.json(messages);
+				return;
+			}
+		}
+
+		res.status(401);
+		res.end('Unauthorized');
+	}).catch(err => {
 		// Error occured
 		if (err) {
 			res.status(500);
 			res.end('An error occured with the current query on our resource');
 			return;
 		}
-
-		// Check if sender or receiver or group you are in is you (security)
-		Group.find({}, (err, groups) => {
-			for (var i = 0; i < groups.length; i++) {
-				var group = groups[i];
-				// Is the receiver an group, if so check if the groups users/owner is in there
-				if (group._id == req.body.id) {
-					// Is the group owner the requester
-					if (group.owner == req.user._doc._id) {
-						res.json(messages);
-						return;
-					}
-					for (var x = 0; x < group.users.length; x++) {
-						var user = group.users[x];
-						// Is one of the users the requester
-						if (user == req.user._doc._id) {
-							res.json(messages);
-							return;		
-						}
-					}
-				}
-
-				// Is the receiver the user
-				if (req.user._doc._id == req.body.id) {
-					res.json(messages);
-					return;
-				}
-			}
-
-			res.status(401);
-			res.end('Unauthorized');
-		});
-
 	});
-
 });
 
 // Get all
 router.get('/', isAuth, (req, res) => {
-	ChatMessage.find().populate('sender').populate('receiver').exec((err, messages) => {
-		if (err) {
-			res.status(500);
-			res.end();
-			return;
-		}
+	co(function *() {
+		const messages = yield ChatMessage.find().populate('sender').populate('receiver').exec();
 		res.json(messages);
+	}).catch(err => {
+		res.status(500);
+		res.end();
 	});
 });
 
 // Read
-router.get('/:id', isAuth, function (req, res) {
-	ChatMessage.findById(req.params.id).populate('sender').populate('receiver').exec((err, message) => {
-		if (err) {
-			res.status(500);
-			res.end();
-			return;
-		}
+router.get('/:id', function (req, res) {
+	co(function *() {
+		const message = yield ChatMessage.findById(req.params.id).populate('sender').populate('receiver').exec();
 		if (!message) {
 			res.status(404);
 			res.end();
-			return;
 		}
+		// DOES NOT WORK YET
 		// User must be the receiver
 		if (message.receiver._id != req.user._doc._id) {
 			res.status(401);
@@ -98,6 +92,10 @@ router.get('/:id', isAuth, function (req, res) {
 			return;
 		}
 		res.json(message);
+	}).catch(err => {
+		console.log(err);
+		res.status(500);
+		res.end();
 	});
 });
 

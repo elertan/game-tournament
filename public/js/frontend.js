@@ -7,9 +7,9 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInter
 	jwtInterceptorProvider.tokenGetter = function () {
 		return window.localStorage.getItem('jwt');
 	};
-	
+
+	$httpProvider.interceptors.push('AuthStateInterceptor');
 	$httpProvider.interceptors.push('jwtInterceptor');
-	
 	$httpProvider.interceptors.push('CustomHttpInterceptor');
 	
 	$urlRouterProvider.otherwise('/');
@@ -24,8 +24,11 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInter
 			templateUrl: '/spa/about'
 		})
 		.state('auth/login', {
-			url: '/auth/login',
-			templateUrl: '/spa/auth/login'
+			url: '/auth/login/',
+			templateUrl: '/spa/auth/login',
+			params: {
+				redirectState: null
+			}
 		})
 		.state('auth/forgotPassword', {
 			url: '/auth/forgotPassword',
@@ -78,8 +81,13 @@ app.config(function ($stateProvider, $urlRouterProvider, $httpProvider, jwtInter
 		.state('inbox/show', {
 			url: '/inbox/:id',
 			templateUrl: '/spa/inbox/show'
+		})
+		.state('mygames', {
+			url: '/mygames',
+			templateUrl: '/spa/mygames'
 		});
 });
+
 
 var socket = io();
 app.factory('Socket', function () {
@@ -97,6 +105,20 @@ app.factory('CustomHttpInterceptor', ['$q', function ($q) {
 			return response;
 		}	
 	};
+}]);
+
+// When error 401 occurs (Unauth) redirect to login page
+app.factory('AuthStateInterceptor', ['$q', '$injector', function ($q, $injector) {
+	return {
+		responseError: function (response) {
+			var $state = $injector.get('$state');
+			// Change the state to login
+			if (response.status == 401) {
+				$state.go('auth/login', { redirectState: $state.current.name });
+			}
+			return response;
+		}
+	}
 }]);
 
 // If logged in, send the data to the socket
@@ -176,8 +198,8 @@ app.controller('Main', ['$scope', '$state', 'Socket', function ($scope, $state, 
 	}
 }]);
 
-app.controller('AuthLogin', ['$scope', '$http', '$state', 'Socket', function ($scope, $http, $state, Socket) {
-		
+app.controller('AuthLogin', ['$scope', '$http', '$state', 'Socket', '$stateParams', function ($scope, $http, $state, Socket, $stateParams) {
+
 		if (window.localStorage.jwt) {
 			$state.go('index');
 		}
@@ -213,7 +235,7 @@ app.controller('AuthLogin', ['$scope', '$http', '$state', 'Socket', function ($s
 					}
 				});
 
-				$state.go('index');
+				$state.go($stateParams.redirectState ? $stateParams.redirectState : 'index');
 			});
 		};
 	}]);
@@ -906,9 +928,14 @@ app.controller('GroupManage', ['$scope', '$http', '$stateParams', '$state', 'Gro
 		}
 	});	
 }]);
+
 app.controller('ChatMenuController', ['$scope', function ($scope) {
 	var overlay = $('.chat-menu');
 	$scope.close = function () {
 		overlay.hide();
 	};
+}]);
+
+app.controller('MyGamesController', ['$scope', '$state', function ($scope, $state) {
+
 }]);
