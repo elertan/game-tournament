@@ -33,28 +33,7 @@ router.post('/', isAuth, requiredPostParams(['name', 'description', 'userIds']),
 			res.status(500);
 			return;
 		}
-
-		// var emails = [];
-		// for (var i = 0; i < users.length; i++) {
-		// 	emails.push(users[i].studentnumber + '@mydavinci.nl');
-		// }
-
-		apiCall({
-			method: 'post',
-			apiUri: '/groups',
-			jwt: req.user._doc.jwt,
-			form: {
-				name: req.body.name,
-				description: req.body.description/*,
-				userEmails: emails*/
-			}
-		}, function (err, data) {
-			if (err || data.err) {
-				res.status(500);
-				res.end();
-				return;
-			}
-
+		
 			var group = new Group();
 			group.name = req.body.name;
 			group.description = req.body.description;
@@ -67,9 +46,9 @@ router.post('/', isAuth, requiredPostParams(['name', 'description', 'userIds']),
 				msg.sender = req.user._doc._id;
 				msg.receiver = users[i]._id;
 				msg.title = 'Invitation to group ' + group.name;
-				msg.content = 'You have been invited to ' + group.name + '.\n Click the link <a href="/#/groups/show/'+ group._id +'">here</a> to see the group';///groups/show({groupId: '+ group._id +')}
+				msg.content = 'You have been invited to ' + group.name + '.\n Click the link <a href="/#/groups/show/'+ group._id +'">here</a> to see the group';
 				msg.save(function (err) {});
-				group.invitations.push({ invitationSend: true, user: users[i]._id });
+				group.invitations.push(users[i]._id);
 			}
 
 			group.save(function (err) {
@@ -77,6 +56,22 @@ router.post('/', isAuth, requiredPostParams(['name', 'description', 'userIds']),
 					res.status(500);
 					return;
 				}
+
+				apiCall({
+				method: 'post',
+				apiUri: '/groups',
+				jwt: req.user._doc.jwt,
+				form: {
+					name: req.body.name,
+					description: req.body.description
+				}
+			}, function (err, data) {
+				if (err || data.err) {
+					res.status(500);
+					res.end();
+					return;
+				}
+				
 				res.json({ success: true });
 			});
 		});
@@ -85,7 +80,7 @@ router.post('/', isAuth, requiredPostParams(['name', 'description', 'userIds']),
 
 // Read
 router.get('/:id', isAuth, function (req, res) {
-	Group.findOne({ _id: req.params.id }).populate('owner').populate('users').populate('joinRequests').exec(function (err, group) {
+	Group.findOne({ _id: req.params.id }).populate('owner').populate('users').populate('joinRequests').populate('invitations').exec(function (err, group) {
 		if (err) {
 			res.status(500);
 		}
@@ -112,7 +107,14 @@ router.put('/:id', isAuth, function (req, res) {
 		group.users = req.body.users;
 		group.joinRequests = req.body.joinRequests;
 		group.invitations = req.body.invitations;
-	    
+		
+		// for (var i = 0; i < req.body.invitations.length; i++) 
+		// {
+		// 	var inv = req.body.invitations[i];
+		// 	group.invitations.push(inv);
+		// 	console.log(inv);
+		// }
+		
 		group.save(function (err) {
 			res.status(200);
 			res.end();

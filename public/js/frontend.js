@@ -641,8 +641,6 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 	});
 
 	Socket.on('GroupShow/Client/Message/New', function (data) {
-		console.log('New chat msg', data);
-
 		$scope.messages.push(data); 
 	});
 
@@ -680,7 +678,7 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 
 		for (var i = $scope.group.invitations.length - 1; i >= 0; i--) 
 		{
-			if ($scope.group.invitations[i].user == $scope.user._id) 
+			if ($scope.group.invitations[i]._id == $scope.user._id) 
 			{
 				// The current user has been invited to the group
 				$scope.joinGroupText = 'Groep Uitnodiging Accepteren';
@@ -713,7 +711,7 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 			// remove invite
 			for (var i = $scope.group.invitations.length - 1; i >= 0; i--) 
 			{
-				if ($scope.group.invitations[i].user == $scope.user._id) 
+				if ($scope.group.invitations[i]._id == $scope.user._id) 
 				{
 					$scope.group.invitations.splice(i, 1);
 				}
@@ -755,27 +753,17 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 	}
 }]);
 
-app.controller('GroupManage', ['$scope', '$http', '$stateParams', '$state', 'Group', 'User', function ($scope, $http, $stateParams, $state, Group, User) {
-	
+app.controller('GroupManage', ['$scope', '$http', '$stateParams', '$state', 'Group', 'User', 'Message', function ($scope, $http, $stateParams, $state, Group, User, Message) {
+
+
 	$scope.goToGroupMemberProfile = function(studentNumber) 
 	{
 		$state.go('profile/show', { studentNumber: studentNumber });
 	}
 	
-	User.query(function (users) 
-	{		
-		users = users.filter(function (val) { return val; });
-		$scope.users = users;
-		
-		setTimeout(function () { 
-			$('.selectpicker').selectpicker(); 
-		}, 50);
-	});
-	
 	Group.get({ id: $stateParams.groupId }, function (group) 
 	{
 		$scope.group = group;
-		
 		if ($scope.user.jwt == $scope.group.owner.jwt) 
 		{
 			$scope.isMe = true;
@@ -784,6 +772,83 @@ app.controller('GroupManage', ['$scope', '$http', '$stateParams', '$state', 'Gro
 		{
 			$state.go('groups/show', { groupId: id});
 		}
+	
+		User.query(function (users) 
+		{			
+			var blockedUserArray = [];
+			blockedUserArray.push($scope.group.owner);
+			for (var i = 0; i < users.length; i++) 
+			{
+				var user = users[i];
+				for (var gi = 0; gi < $scope.group.users.length; gi++) 
+				{
+					var groupUser = $scope.group.users[gi];
+					if(user._id != $scope.group.owner._id)
+					{
+						if(user._id == groupUser._id)
+						{
+							blockedUserArray.push(user);	
+						}
+					}
+				}
+				
+				for (var ji = 0; ji < $scope.group.joinRequests.length; ji++) 
+				{
+					var joinRequest = $scope.group.joinRequests[ji];
+				    if(user._id == joinRequest._id)
+					{
+						blockedUserArray.push(user);
+					}
+				}
+				
+				for (var invitationI = 0; invitationI < $scope.group.invitations.length; invitationI++) 
+				{
+					var invitation = $scope.group.invitations[invitationI];
+				    if(user._id == invitation._id)
+					{		
+						blockedUserArray.push(user);
+					}
+				}
+			}
+			
+			for (var i = 0; i < blockedUserArray.length; i++) 
+			{
+				var blockedUser = blockedUserArray[i];
+				users = users.filter(function(user)
+				{
+					return (user._id !== blockedUser._id);
+				});
+			}
+			
+			$scope.invitationsSelectPicker = users;
+			setTimeout(function () 
+			{ 
+				$('.selectpicker').selectpicker(); 
+			}, 50);
+		});
+		
+		$scope.SendInvitations = function () 
+		{
+			for (var i = 0; i < $scope.invitations.length; i++) 
+			{
+				var userId = $scope.invitations[i];
+				
+				var msg = new Message();
+				msg.title = 'Je hebt een groeps uitnodiging ontvangen van de groep: ' + $scope.group.name;
+				msg.content = 'You have been invited to ' + $scope.group.name + '.\n Click the link <a href="/#/groups/show/'+ $scope.group._id +'">here</a> to see the group';
+				msg.receiverId = userId;
+				msg.$save(function (err) {
+				
+				});
+				
+				$scope.group.invitations.push(userId);
+			}
+			
+			Group.update({ id: $scope.group._id }, $scope.group, function () 
+			{	
+				$state.go($state.current, {}, { reload: true });
+			});
+		};
 		
 		$scope.AcceptJoinRequest = function(joinRequest)
 		{		
@@ -803,13 +868,13 @@ app.controller('GroupManage', ['$scope', '$http', '$stateParams', '$state', 'Gro
 			});	
 		}
 		
-		$scope.RemoveGroupMember = function(studentNumber) 
+		$scope.RemoveInvitation = function(invitationUserId) 
 		{
-			for (var i = 0; i < $scope.group.users.length; i++) 
+			for (var i = 0; i < $scope.group.invitations.length; i++) 
 			{
-				if ($scope.group.users[i].studentnumber == studentNumber) 
+				if ($scope.group.invitations[i]._id == invitationUserId) 
 				{
-					$scope.group.users.splice(i, 1);
+					$scope.group.invitations.splice(i, 1);
 					break;
 				}
 			}
@@ -818,6 +883,23 @@ app.controller('GroupManage', ['$scope', '$http', '$stateParams', '$state', 'Gro
 			{	
 				$state.go($state.current, {}, { reload: true });	
 			});	
+		}
+		
+		$scope.RemoveGroupMember = function(userId) 
+		{
+			for (var i = 0; i < $scope.group.users.length; i++) 
+			{
+				if ($scope.group.users[i]._id == userId) 
+				{
+					$scope.group.users.splice(i, 1);
+					break;
+				}
+			}
+			
+			Group.update({ id: $scope.group._id }, $scope.group, function () 
+			{
+				$state.go($state.current, {}, { reload: true });	
+			});
 		}
 		
 		$scope.groupShowClicked = function()

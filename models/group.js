@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 
 const schema = new Schema({
 	owner: { type: Schema.Types.ObjectId, ref: 'User' },
-	invitations: [{ invitationSend: Boolean, user: { type: Schema.Types.ObjectId, ref: 'User' } }],
+	invitations: [{ type: Schema.Types.ObjectId, ref: 'User' }],//	invitations: [{ invitationSend: Boolean, user: { type: Schema.Types.ObjectId, ref: 'User' } }],
 	joinRequests: [{ type: Schema.Types.ObjectId, ref: 'User' }],
 	users: [{ type: Schema.Types.ObjectId, ref: 'User' }],
 	name: String,
