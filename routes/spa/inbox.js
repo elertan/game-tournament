@@ -4,19 +4,20 @@ const express = require('express');
 const router = express.Router();
 
 const config = require('../../config');
+const isAuth = require('../../middleware/isAuth');
 
 router.use('/resource', require('./inbox/resource'));
 
 // Add routes here
-router.get('/', function (req, res) {
+router.get('/', isAuth, function (req, res) {
 	res.render('spa/inbox');
 });
 
-router.get('/show', function (req, res) {
+router.get('/show', isAuth, function (req, res) {
 	res.render('spa/inbox/show');
 });
 
-router.get('/create', function (req, res) {
+router.get('/create', isAuth, function (req, res) {
 	res.render('spa/inbox/create');
 });
 

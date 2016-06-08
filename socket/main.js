@@ -5,13 +5,13 @@ const Group = require('../models/group');
 
 const socketMessaging = require('./messaging');
 
-module.exports = function (io) {
-    io.on('connection', function (socket) {
-        socket.on('init', function (data, cb) {
+module.exports = io => {
+    io.on('connection', socket => {
+        socket.on('init', (data, cb) => {
 
         });
-        socket.on('login', function (jwt, cb) {
-            jsonwebtoken.verify(jwt, config.secret, function (err, user) {
+        socket.on('login', (jwt, cb) => {
+            jsonwebtoken.verify(jwt, config.secret, (err, user) => {
                 if (err) {
                     cb(err);
                     return;
@@ -25,14 +25,14 @@ module.exports = function (io) {
                         }
                         
                         for (var i = groups.length - 1; i >= 0; i--) {
-                            socket.join('GroupShow/' + groups[i]._id);
+                            socket.join('GroupChat/' + groups[i]._id);
                         }
                     });
 
                 cb(null, user);
             });
         });
-        socket.on('logout', function () {
+        socket.on('logout', () => {
             if (socket.user) {
                 delete socket.user;
             }
@@ -40,7 +40,7 @@ module.exports = function (io) {
             //Leave any previous group chats
             for (var prop in io.sockets.adapter.sids[socket.id]) {
                 if (io.sockets.adapter.sids[socket.id].hasOwnProperty(prop)) {
-                    if (prop.indexOf('GroupShow/') > -1) {
+                    if (prop.indexOf('GroupChat/') > -1) {
                         console.log('Leaving ' + prop);
                         socket.leave(prop);
                     }

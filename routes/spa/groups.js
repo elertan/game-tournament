@@ -3,22 +3,28 @@
 const express = require('express');
 const router = express.Router();
 
+const isAuth = require('../../middleware/isAuth');
+
 router.use('/resource', require('./groups/resource'));
 
-router.get('/', function (req, res) {
+router.get('/', isAuth, function (req, res) {
 	res.render('spa/groups/index');
 });
 
-router.get('/create', function (req, res) {
+router.get('/create', isAuth, function (req, res) {
 	res.render('spa/groups/create');
 });
 
-router.get('/show', function (req, res) {
+router.get('/show', isAuth, function (req, res) {
 	res.render('spa/groups/show');
 });
 
-router.get('/manage', function (req, res) {
+router.get('/manage', isAuth, function (req, res) {
 	res.render('spa/groups/manage');
+});
+
+router.get('/chat', isAuth, function (req, res) {
+	res.render('spa/groups/chat');
 });
 
 module.exports = router;

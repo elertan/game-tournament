@@ -42,6 +42,10 @@ div(ng-controller="Main")
 									i.fa.fa-user
 									| &nbsp;Profiel
 							li
+								a(ui-sref="mygames({ studentNumber: user.studentnumber })")
+									i.fa.fa-keyboard-o
+									| &nbsp;Mijn Games
+							li
 								a(ui-sref="inbox")
 									i.fa.fa-inbox
 									| &nbsp;Inbox &nbsp;

@@ -1,0 +1,11 @@
+extends ../main.jade
+
+block content
+	h1 Mijn Tournament Games
+	p Je doet nog niet mee met een van de tournament games.
+	h1 Alle Tournament Games
+	for extension in ge.extensions
+		div.col-md-3
+			div.tournamentGamePotraitView(style="background: url('#{extension.backgroundUrl}'); background-size: cover;")
+				div(style="background: rgba(20, 20, 20, 0.5); height: 50px;")
+					h4(style="text-align: center; color: #fff;") #{extension.name}

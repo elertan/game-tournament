@@ -1,0 +1,12 @@
+{
+	"words": [
+		{
+			"word": "kanker",
+			"ignoredWord": false
+		},
+		{
+			"word": "hoe",
+			"ignoredWord": true
+		}
+	]
+}
