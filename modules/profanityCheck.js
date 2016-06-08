@@ -64,7 +64,7 @@ profane.checkOffensiveWordsWithFile = (filename, cb) => {
 
 			var data = JSON.parse(content);
 
-			const words = OffensiveWord.find({});
+			const words = yield OffensiveWord.find({});
 			for (var i = 0; i < data.words.length; i++) {
 				var wordFound = false;
 				for (var x = 0; x < words.length; x++) {
@@ -84,6 +84,8 @@ profane.checkOffensiveWordsWithFile = (filename, cb) => {
 			}
 			resolve();
 			cb();
+		}).catch(err => {
+			reject(err);
 		});
 	});
 };
