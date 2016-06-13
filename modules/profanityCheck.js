@@ -1,6 +1,6 @@
 'use strict';
 
-const fs = require('fs');
+const fsp = require('fs-promise');
 const co = require('co');
 
 const OffensiveWord = require('../models/offensiveWord');
@@ -33,14 +33,15 @@ profane.init = function(cb) {
 
             profane.didInit = true;
             resolve();
-            cb();
+            if (cb) {
+                cb();
+            }
         });
     });
 };
 
 profane.replaceWords = function(text, replacement) {
     var foundWords = profane.getWordCounts(text);
-    console.log(foundWords);
 
     for (var key in foundWords) {
         if (!replacement) {
@@ -60,7 +61,7 @@ profane.replaceWords = function(text, replacement) {
 profane.checkOffensiveWordsWithFile = (filename, cb) => {
     return new Promise((resolve, reject) => {
         co(function*() {
-            const content = yield fs.readFile(filename);
+            const content = yield fsp.readFile(filename);
 
             var data = JSON.parse(content);
 
@@ -83,7 +84,9 @@ profane.checkOffensiveWordsWithFile = (filename, cb) => {
                 }
             }
             resolve();
-            cb();
+            if (cb) {
+                cb();
+            }
         }).catch(err => {
             reject(err);
         });

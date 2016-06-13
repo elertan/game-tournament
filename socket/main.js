@@ -19,15 +19,15 @@ module.exports = io => {
                 socket.user = user;
                 
                 Group.find({ $or: [{ owner: user._doc._id }, { users: user._doc._id }] }, (err, groups) => {
-                        if (err) {
-                            console.log(err);
-                            return;
-                        }
-                        
-                        for (var i = groups.length - 1; i >= 0; i--) {
-                            socket.join('GroupChat/' + groups[i]._id);
-                        }
-                    });
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    
+                    for (var i = groups.length - 1; i >= 0; i--) {
+                        socket.join('GroupChat/' + groups[i]._id);
+                    }
+                });
 
                 cb(null, user);
             });
