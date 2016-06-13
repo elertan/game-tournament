@@ -826,7 +826,7 @@ app.controller('GroupChat', ['$scope', '$stateParams', '$state', 'Group', 'User'
 	
 }]);
 
-app.controller('GroupManage', ['$scope', '$http', '$stateParams', '$state', 'Group', 'User', function ($scope, $http, $stateParams, $state, Group, User) {
+app.controller('GroupManage', ['$scope', '$http', '$stateParams', '$state', 'Group', 'User', 'Message', function ($scope, $http, $stateParams, $state, Group, User, Message) {
 	
 	$scope.goToGroupMemberProfile = function(studentNumber) {
 		$state.go('profile/show', { studentNumber: studentNumber });
@@ -849,7 +849,7 @@ app.controller('GroupManage', ['$scope', '$http', '$stateParams', '$state', 'Gro
 		}
 	
 		User.query(function (users) 
-		{			
+		{
 			var blockedUserArray = [];
 			blockedUserArray.push($scope.group.owner);
 			for (var i = 0; i < users.length; i++) 
