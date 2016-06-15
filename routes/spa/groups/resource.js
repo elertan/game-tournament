@@ -1,22 +1,22 @@
-'use strict';
+"use strict";
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const mailer = require('../../../modules/mailer');
+const mailer = require("../../../modules/mailer");
 
-const User = require('../../../models/user');
-const Group = require('../../../models/group');
-const Message = require('../../../models/message');
+const User = require("../../../models/user");
+const Group = require("../../../models/group");
+const Message = require("../../../models/message");
 
-const isAuth = require('../../../middleware/isAuth');
-const requiredPostParams = require('../../../middleware/requiredPostParams');
-const apiCall = require('../../../modules/apiCall');
+const isAuth = require("../../../middleware/isAuth");
+const requiredPostParams = require("../../../middleware/requiredPostParams");
+const apiCall = require("../../../modules/apiCall");
 
 
 // Get all
-router.get('/', isAuth, function (req, res) {
-	Group.find({}).populate('owner').populate('users').exec(function (err, groups) {
+router.get("/", isAuth, function (req, res) {
+	Group.find({}).populate("owner").populate("users").exec(function (err, groups) {
 		if (err) {
 			res.status(500);
 		}
@@ -25,7 +25,7 @@ router.get('/', isAuth, function (req, res) {
 });
 
 // Create
-router.post('/', isAuth, requiredPostParams(['name', 'description', 'userIds']), function (req, res) {
+router.post("/", isAuth, requiredPostParams(["name", "description", "userIds"]), function (req, res) {
 	User.find({ _id: {
 		$in: req.body.userIds
 	}}, function (err, users) {
@@ -45,8 +45,8 @@ router.post('/', isAuth, requiredPostParams(['name', 'description', 'userIds']),
 				var msg = new Message();
 				msg.sender = req.user._doc._id;
 				msg.receiver = users[i]._id;
-				msg.title = 'Invitation to group ' + group.name;
-				msg.content = 'You have been invited to ' + group.name + '.\n Click the link <a href="/#/groups/show/'+ group._id +'">here</a> to see the group';
+				msg.title = "Invitation to group " + group.name;
+				msg.content = "You have been invited to " + group.name + '.\n Click the link <a href="/#/groups/show/'+ group._id +'">here</a> to see the group';
 				msg.save(function (err) {});
 				group.invitations.push(users[i]._id);
 			}
@@ -58,8 +58,8 @@ router.post('/', isAuth, requiredPostParams(['name', 'description', 'userIds']),
 				}
 
 				apiCall({
-				method: 'post',
-				apiUri: '/groups',
+				method: "post",
+				apiUri: "/groups",
 				jwt: req.user._doc.jwt,
 				form: {
 					name: req.body.name,
@@ -79,8 +79,8 @@ router.post('/', isAuth, requiredPostParams(['name', 'description', 'userIds']),
 });
 
 // Read
-router.get('/:id', isAuth, function (req, res) {
-	Group.findOne({ _id: req.params.id }).populate('owner').populate('users').populate('joinRequests').populate('invitations').exec(function (err, group) {
+router.get("/:id", isAuth, function (req, res) {
+	Group.findOne({ _id: req.params.id }).populate("owner").populate("users").populate("joinRequests").populate("invitations").exec(function (err, group) {
 		if (err) {
 			res.status(500);
 		}
@@ -90,8 +90,8 @@ router.get('/:id', isAuth, function (req, res) {
 });
 
 // Update
-router.put('/:id', isAuth, function (req, res) {	
-	Group.findOne({ _id: req.body._id }).populate('owner').populate('users').exec(function (err, group) {
+router.put("/:id", isAuth, function (req, res) {	
+	Group.findOne({ _id: req.body._id }).populate("owner").populate("users").exec(function (err, group) {
 		if (err) {
 			res.status(500);
 			return;
@@ -123,7 +123,7 @@ router.put('/:id', isAuth, function (req, res) {
 });
 
 // Delete
-router.delete('/:id', isAuth, function (req, res) {
+router.delete("/:id", isAuth, function (req, res) {
 	var query = Group.findOne({ _id: req.params.id }).exec();
 	query.then((err, group) => {
 		if (err) {

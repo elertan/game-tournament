@@ -1,7 +1,7 @@
-'use strict';
+"use strict";
 
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt-nodejs');
+const mongoose = require("mongoose");
+const bcrypt = require("bcrypt-nodejs");
 const Schema = mongoose.Schema;
 
 const schema = new Schema({
@@ -22,19 +22,19 @@ schema.methods.validPassword = function (password, cb) {
 	});
 };
 
-schema.pre('save', function (next) {
+schema.pre("save", function (next) {
 	if (!this.created_at) {
 		this.created_at = new Date();
-		this.priveleges = ['user']; 
+		this.priveleges = ["user"]; 
 	}
 	
 	this.updated_at = new Date();
 	next();
 });
 
-schema.pre('update', function (next) {
+schema.pre("update", function (next) {
 	this.updated_at = new Date();
 	next();
 });
 
-module.exports = mongoose.model('User', schema);
+module.exports = mongoose.model("User", schema);

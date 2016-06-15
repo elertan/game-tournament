@@ -1,21 +1,21 @@
-'use strict';
+"use strict";
 
-const request = require('request');
+const request = require("request");
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const isAuth = require('../../../middleware/isAuth');
+const isAuth = require("../../../middleware/isAuth");
 
-const User = require('../../../models/user');
+const User = require("../../../models/user");
 
 // Get all
-router.get('/', function (req, res) {
+router.get("/", function (req, res) {
 	res.status(401); // Not Implemented
 });
 
 // Read
-router.get('/:studentNumber', isAuth, function (req, res) {
+router.get("/:studentNumber", isAuth, function (req, res) {
 	User.findOne({ studentnumber: req.params.studentNumber }, function (err, user) {
 		if (err) {
 			res.status(500);
@@ -24,7 +24,7 @@ router.get('/:studentNumber', isAuth, function (req, res) {
 		
 		if (!user) {
 			res.status(404);
-			res.json({ err: 'Student was not found' });
+			res.json({ err: "Student was not found" });
 			return;
 		}
 		
@@ -32,7 +32,7 @@ router.get('/:studentNumber', isAuth, function (req, res) {
 	});
 });
 
-router.post('/ChangeProfile', isAuth, function (req, res) {
+router.post("/ChangeProfile", isAuth, function (req, res) {
 	const form = req.body;
 	
 	if (req.user._doc.studentnumber != form.studentNumber) {
@@ -48,7 +48,7 @@ router.post('/ChangeProfile', isAuth, function (req, res) {
 		
 		if (!user) {
 			res.status(404);
-			res.json({ err: 'Student was not found' });
+			res.json({ err: "Student was not found" });
 			return;
 		}
 		

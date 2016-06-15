@@ -1,25 +1,25 @@
-'use strict';
+"use strict";
 
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const User = require('./user');
+const User = require("./user");
 
 const schema = new Schema({
 	content: String,
 	sender: {
 		type: Schema.Types.ObjectId,
-		ref: 'User'
+		ref: "User"
 	},
 	receiver: {
 		type: Schema.Types.ObjectId,
-		ref: 'User'
+		ref: "User"
 	},
 	updated_at: Date,
 	created_at: Date
 });
 
-schema.pre('save', function (next) {
+schema.pre("save", function (next) {
 	if (!this.created_at) {
 		this.created_at = new Date();
 	}
@@ -28,9 +28,9 @@ schema.pre('save', function (next) {
 	next();
 });
 
-schema.pre('update', function (next) {
+schema.pre("update", function (next) {
 	this.updated_at = new Date();
 	next();
 });
 
-module.exports = mongoose.model('ChatMessage', schema);
+module.exports = mongoose.model("ChatMessage", schema);

@@ -1,7 +1,7 @@
-'use strict';
+"use strict";
 
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt-nodejs');
+const mongoose = require("mongoose");
+const bcrypt = require("bcrypt-nodejs");
 const Schema = mongoose.Schema;
 
 const schema = new Schema({
@@ -9,7 +9,7 @@ const schema = new Schema({
 	verificationCode: String
 });
 
-schema.pre('save', function (next) {
+schema.pre("save", function (next) {
 	if (!this.created_at) {
 		this.created_at = new Date();
 	}
@@ -18,9 +18,9 @@ schema.pre('save', function (next) {
 	next();
 });
 
-schema.pre('update', function (next) {
+schema.pre("update", function (next) {
 	this.updated_at = new Date();
 	next();
 });
 
-module.exports = mongoose.model('Registration', schema);
+module.exports = mongoose.model("Registration", schema);

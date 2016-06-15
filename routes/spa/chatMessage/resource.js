@@ -1,29 +1,29 @@
- 'use strict';
+ "use strict";
 
-const co = require('co');
+const co = require("co");
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const isAuth = require('../../../middleware/isAuth');
-const requiredPostParams = require('../../../middleware/requiredPostParams');
+const isAuth = require("../../../middleware/isAuth");
+const requiredPostParams = require("../../../middleware/requiredPostParams");
 
-const User = require('../../../models/user');
-const ChatMessage = require('../../../models/chatMessage');
-const Group = require('../../../models/group');
+const User = require("../../../models/user");
+const ChatMessage = require("../../../models/chatMessage");
+const Group = require("../../../models/group");
 
 // Complex querying
-router.post('/findAllByReceiver', isAuth, (req, res) => {
+router.post("/findAllByReceiver", isAuth, (req, res) => {
 	co(function *() {
 		// Make sure the query is an object
-		if (typeof(req.body.id) != 'string') {
+		if (typeof(req.body.id) != "string") {
 			res.status(400);
-			res.end('Post data must be an object with an id string');
+			res.end("Post data must be an object with an id string");
 			return;
 		}
 
 		// Find all chat messages by receiver and fill in the sender key with its referenced User
-		const messages = yield ChatMessage.find({ receiver: req.body.id }).populate('sender').exec();
+		const messages = yield ChatMessage.find({ receiver: req.body.id }).populate("sender").exec();
 
 		// Check if sender or receiver or group you are in is you (security)
 		const groups = yield Group.find({});
@@ -54,21 +54,21 @@ router.post('/findAllByReceiver', isAuth, (req, res) => {
 		}
 
 		res.status(401);
-		res.end('Unauthorized');
+		res.end("Unauthorized");
 	}).catch(err => {
 		// Error occured
 		if (err) {
 			res.status(500);
-			res.end('An error occured with the current query on our resource');
+			res.end("An error occured with the current query on our resource");
 			return;
 		}
 	});
 });
 
 // Get all
-router.get('/', isAuth, (req, res) => {
+router.get("/", isAuth, (req, res) => {
 	co(function *() {
-		const messages = yield ChatMessage.find().populate('sender').populate('receiver').exec();
+		const messages = yield ChatMessage.find().populate("sender").populate("receiver").exec();
 		res.json(messages);
 	}).catch(err => {
 		res.status(500);
@@ -77,9 +77,9 @@ router.get('/', isAuth, (req, res) => {
 });
 
 // Read
-router.get('/:id', function (req, res) {
+router.get("/:id", function (req, res) {
 	co(function *() {
-		const message = yield ChatMessage.findById(req.params.id).populate('sender').populate('receiver').exec();
+		const message = yield ChatMessage.findById(req.params.id).populate("sender").populate("receiver").exec();
 		if (!message) {
 			res.status(404);
 			res.end();
@@ -119,7 +119,7 @@ router.get('/:id', function (req, res) {
 // });
 
 // Delete
-router.delete('/:id', isAuth, (req, res) => {
+router.delete("/:id", isAuth, (req, res) => {
 	ChatMessage.findById(req.params.id, (err, msg) => {
 		if (err) {
 			res.status(500);

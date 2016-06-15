@@ -1,6 +1,6 @@
-'use strict';
+"use strict";
 
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const schema = new Schema({
@@ -13,7 +13,7 @@ const schema = new Schema({
 	created_at: Date
 });
 
-schema.pre('save', function (next) {
+schema.pre("save", function (next) {
 	if (!this.created_at) {
 		this.created_at = new Date();
 	}
@@ -22,9 +22,9 @@ schema.pre('save', function (next) {
 	next();
 });
 
-schema.pre('update', function (next) {
+schema.pre("update", function (next) {
 	this.updated_at = new Date();
 	next();
 });
 
-module.exports = mongoose.model('OffensiveWord', schema);
+module.exports = mongoose.model("OffensiveWord", schema);

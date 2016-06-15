@@ -1,16 +1,16 @@
-const jsonwebtoken = require('jsonwebtoken');
-const config = require('../config');
+const jsonwebtoken = require("jsonwebtoken");
+const config = require("../config");
 
-const Group = require('../models/group');
+const Group = require("../models/group");
 
-const socketMessaging = require('./messaging');
+const socketMessaging = require("./messaging");
 
 module.exports = io => {
-    io.on('connection', socket => {
-        socket.on('init', (data, cb) => {
+    io.on("connection", socket => {
+        socket.on("init", (data, cb) => {
 
         });
-        socket.on('login', (jwt, cb) => {
+        socket.on("login", (jwt, cb) => {
             jsonwebtoken.verify(jwt, config.secret, (err, user) => {
                 if (err) {
                     cb(err);
@@ -25,14 +25,14 @@ module.exports = io => {
                     }
                     
                     for (var i = groups.length - 1; i >= 0; i--) {
-                        socket.join('GroupChat/' + groups[i]._id);
+                        socket.join("GroupChat/" + groups[i]._id);
                     }
                 });
 
                 cb(null, user);
             });
         });
-        socket.on('logout', () => {
+        socket.on("logout", () => {
             if (socket.user) {
                 delete socket.user;
             }
@@ -40,15 +40,15 @@ module.exports = io => {
             //Leave any previous group chats
             for (var prop in io.sockets.adapter.sids[socket.id]) {
                 if (io.sockets.adapter.sids[socket.id].hasOwnProperty(prop)) {
-                    if (prop.indexOf('GroupChat/') > -1) {
-                        console.log('Leaving ' + prop);
+                    if (prop.indexOf("GroupChat/") > -1) {
+                        console.log("Leaving " + prop);
                         socket.leave(prop);
                     }
                 }
             }
         });
 
-        socket.on('test', function () {
+        socket.on("test", function () {
             
         });
 

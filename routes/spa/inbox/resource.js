@@ -1,17 +1,17 @@
- 'use strict';
+ "use strict";
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const isAuth = require('../../../middleware/isAuth');
-const requiredPostParams = require('../../../middleware/requiredPostParams');
+const isAuth = require("../../../middleware/isAuth");
+const requiredPostParams = require("../../../middleware/requiredPostParams");
 
-const User = require('../../../models/user');
-const Message = require('../../../models/message');
+const User = require("../../../models/user");
+const Message = require("../../../models/message");
 
 // Get all
-router.get('/', isAuth, function (req, res) {
-	Message.find({ receiver: req.user._doc._id }).populate('sender').populate('receiver').exec(function (err, messages) {
+router.get("/", isAuth, function (req, res) {
+	Message.find({ receiver: req.user._doc._id }).populate("sender").populate("receiver").exec(function (err, messages) {
 		if (err) {
 			res.status(500);
 			res.end();
@@ -22,8 +22,8 @@ router.get('/', isAuth, function (req, res) {
 });
 
 // Read
-router.get('/:id', isAuth, function (req, res) {
-	Message.findById(req.params.id).populate('sender').populate('receiver').exec(function (err, message) {
+router.get("/:id", isAuth, function (req, res) {
+	Message.findById(req.params.id).populate("sender").populate("receiver").exec(function (err, message) {
 		if (err) {
 			res.status(500);
 			res.end();
@@ -45,7 +45,7 @@ router.get('/:id', isAuth, function (req, res) {
 });
 
 // Create
-router.post('/', isAuth, requiredPostParams(['title', 'content', 'receiverId']), function (req, res) {
+router.post("/", isAuth, requiredPostParams(["title", "content", "receiverId"]), function (req, res) {
 	var message = new Message();
 	message.sender = req.user._doc._id;
 	message.receiver = req.body.receiverId;
@@ -64,7 +64,7 @@ router.post('/', isAuth, requiredPostParams(['title', 'content', 'receiverId']),
 });
 
 // Delete
-router.delete('/:id', isAuth, function (req, res) {
+router.delete("/:id", isAuth, function (req, res) {
 	Message.findById(req.params.id, function (err, msg) {
 		if (err) {
 			res.status(500);
