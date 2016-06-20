@@ -1,11 +1,9 @@
-'use strict';
+const fsp = require("fs-promise");
+const co = require("co");
 
-const fsp = require('fs-promise');
-const co = require('co');
+const OffensiveWord = require("../models/offensiveWord");
 
-const OffensiveWord = require('../models/offensiveWord');
-
-const Profane = require('profane');
+const Profane = require("profane");
 const profane = new Profane();
 
 function escapeRegExp(str) {
@@ -13,7 +11,7 @@ function escapeRegExp(str) {
 }
 
 function replaceAll(str, find, replace) {
-    return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
+    return str.replace(new RegExp(escapeRegExp(find), "g"), replace);
 }
 
 profane.didInit = false;
@@ -45,9 +43,9 @@ profane.replaceWords = function(text, replacement) {
 
     for (var key in foundWords) {
         if (!replacement) {
-            var r = '';
+            var r = "";
             for (var i = 0; i < key.length; i++) {
-                r += '*';
+                r += "*";
             }
             text = replaceAll(text, key, r);
         } else {

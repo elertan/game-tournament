@@ -1,19 +1,19 @@
-'use strict';
+"use strict";
 
-const co = require('co');
+const co = require("co");
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const isAuth = require('../../middleware/isAuth');
+const isAuth = require("../../middleware/isAuth");
 var ge = {};
-require('../../modules/game-extensions').then(gExtensions => {
+require("../../modules/game-extensions").then(gExtensions => {
 	ge = gExtensions;
 });
 
-router.get('/', isAuth, (req, res) => {
+router.get("/", isAuth, (req, res) => {
 	co(function *() {
-		res.render('spa/mygames/index', {
+		res.render("spa/mygames/index", {
 			ge: ge
 		});
 	}).catch(err => {

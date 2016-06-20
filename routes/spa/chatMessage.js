@@ -1,10 +1,10 @@
-'use strict';
+"use strict";
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const config = require('../../config');
+const config = require("../../config");
 
-router.use('/resource', require('./chatMessage/resource'));
+router.use("/resource", require("./chatMessage/resource"));
 
 module.exports = router;

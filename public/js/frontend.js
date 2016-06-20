@@ -1,108 +1,108 @@
-var app = angular.module('app', ['ui.router', 'angular-jwt', 'ngResource', 'ngSanitize']);
+var app = angular.module("app", ["ui.router", "angular-jwt", "ngResource", "ngSanitize"]);
 
 var loadedScripts = [];
 
 app.config(function($stateProvider, $urlRouterProvider, $httpProvider, jwtInterceptorProvider) {
 
 	jwtInterceptorProvider.tokenGetter = function() {
-		return window.localStorage.getItem('jwt');
+		return window.localStorage.getItem("jwt");
 	};
 
-	$httpProvider.interceptors.push('AuthStateInterceptor');
-	$httpProvider.interceptors.push('jwtInterceptor');
-	$httpProvider.interceptors.push('CustomHttpInterceptor');
+	$httpProvider.interceptors.push("AuthStateInterceptor");
+	$httpProvider.interceptors.push("jwtInterceptor");
+	$httpProvider.interceptors.push("CustomHttpInterceptor");
 
-	$urlRouterProvider.otherwise('/');
+	$urlRouterProvider.otherwise("/");
 
 	$stateProvider
-		.state('index', {
-			url: '/',
-			templateUrl: '/spa/index'
+		.state("index", {
+			url: "/",
+			templateUrl: "/spa/index"
 		})
-		.state('about', {
-			url: '/about',
-			templateUrl: '/spa/about'
+		.state("about", {
+			url: "/about",
+			templateUrl: "/spa/about"
 		})
-		.state('auth/login', {
-			url: '/auth/login/',
-			templateUrl: '/spa/auth/login',
+		.state("auth/login", {
+			url: "/auth/login/",
+			templateUrl: "/spa/auth/login",
 			params: {
 				redirectState: null
 			}
 		})
-		.state('auth/forgotPassword', {
-			url: '/auth/forgotPassword',
-			templateUrl: '/spa/auth/forgotPassword'
+		.state("auth/forgotPassword", {
+			url: "/auth/forgotPassword",
+			templateUrl: "/spa/auth/forgotPassword"
 		})
-		.state('auth/forgotPassword/verify', {
-			url: '/auth/forgotPassword/:verificationCode',
-			templateUrl: '/spa/auth/forgotPassword/verify'
+		.state("auth/forgotPassword/verify", {
+			url: "/auth/forgotPassword/:verificationCode",
+			templateUrl: "/spa/auth/forgotPassword/verify"
 		})
-		.state('auth/register', {
-			url: '/auth/register',
-			templateUrl: '/spa/auth/register'
+		.state("auth/register", {
+			url: "/auth/register",
+			templateUrl: "/spa/auth/register"
 		})
-		.state('auth/register/verify', {
-			url: '/auth/register/:verificationCode',
-			templateUrl: '/spa/auth/register/verify'
+		.state("auth/register/verify", {
+			url: "/auth/register/:verificationCode",
+			templateUrl: "/spa/auth/register/verify"
 		})
-		.state('groups', {
-			url: '/groups',
-			templateUrl: '/spa/groups'
+		.state("groups", {
+			url: "/groups",
+			templateUrl: "/spa/groups"
 		})
-		.state('groups/show', {
-			url: '/groups/show/:groupId',
-			templateUrl: '/spa/groups/show'
+		.state("groups/show", {
+			url: "/groups/show/:groupId",
+			templateUrl: "/spa/groups/show"
 		})
-		.state('group/manage', {
-			url: '/groups/manage/:groupId',
-			templateUrl: '/spa/groups/manage'
+		.state("group/manage", {
+			url: "/groups/manage/:groupId",
+			templateUrl: "/spa/groups/manage"
 		})
-		.state('group/chat', {
-			url: '/groups/chat/:groupId',
-			templateUrl: '/spa/groups/chat'
+		.state("group/chat", {
+			url: "/groups/chat/:groupId",
+			templateUrl: "/spa/groups/chat"
 		})
-		.state('groups/create', {
-			url: '/groups/create',
-			templateUrl: '/spa/groups/create'
+		.state("groups/create", {
+			url: "/groups/create",
+			templateUrl: "/spa/groups/create"
 		})
-		.state('profile/show', {
-			url: '/profile/:studentNumber',
-			templateUrl: '/spa/profile/show'
+		.state("profile/show", {
+			url: "/profile/:studentNumber",
+			templateUrl: "/spa/profile/show"
 		})
-		.state('inbox', {
-			url: '/inbox',
-			templateUrl: '/spa/inbox'
+		.state("inbox", {
+			url: "/inbox",
+			templateUrl: "/spa/inbox"
 		})
-		.state('inbox/create', {
-			url: '/inbox/create',
-			templateUrl: '/spa/inbox/create'
+		.state("inbox/create", {
+			url: "/inbox/create",
+			templateUrl: "/spa/inbox/create"
 		})
-		.state('inbox/show', {
-			url: '/inbox/:id',
-			templateUrl: '/spa/inbox/show'
+		.state("inbox/show", {
+			url: "/inbox/:id",
+			templateUrl: "/spa/inbox/show"
 		})
-		.state('games', {
-			url: '/games',
-			templateUrl: '/spa/games'
+		.state("games", {
+			url: "/games",
+			templateUrl: "/spa/games"
 		})
-		.state('games/show', {
-			url: '/games/:gameName',
-			templateUrl: '/spa/games/show'
+		.state("games/show", {
+			url: "/games/:gameName",
+			templateUrl: "/spa/games/show"
 		})
-		.state('mygames', {
-			url: '/mygames',
-			templateUrl: '/spa/mygames'
+		.state("mygames", {
+			url: "/mygames",
+			templateUrl: "/spa/mygames"
 		});
 });
 
 
 var socket = io();
-app.factory('Socket', function() {
+app.factory("Socket", function() {
 	return socket;
 });
 
-app.factory('CustomHttpInterceptor', ['$q', function($q) {
+app.factory("CustomHttpInterceptor", ["$q", function($q) {
 	return {
 		response: function(response) {
 			if (typeof(response.data) == "object" && response.data != null) {
@@ -116,13 +116,13 @@ app.factory('CustomHttpInterceptor', ['$q', function($q) {
 }]);
 
 // When error 401 occurs (Unauth) redirect to login page
-app.factory('AuthStateInterceptor', ['$q', '$injector', function($q, $injector) {
+app.factory("AuthStateInterceptor", ["$q", "$injector", function($q, $injector) {
 	return {
 		responseError: function(response) {
-			var $state = $injector.get('$state');
+			var $state = $injector.get("$state");
 			// Change the state to login
 			if (response.status == 401) {
-				$state.go('auth/login', {
+				$state.go("auth/login", {
 					redirectState: $state.current.name
 				});
 			}
@@ -132,52 +132,52 @@ app.factory('AuthStateInterceptor', ['$q', '$injector', function($q, $injector) 
 }]);
 
 // If logged in, send the data to the socket
-if (localStorage.getItem('jwt')) {
-	socket.emit('login', localStorage.getItem('jwt'), function(err, user) {
+if (localStorage.getItem("jwt")) {
+	socket.emit("login", localStorage.getItem("jwt"), function(err, user) {
 		if (err) {
 
 		}
 	});
 }
 
-app.factory('Group', function($resource) {
-	return $resource('/spa/groups/resource/:id', {
-		id: '@id'
+app.factory("Group", function($resource) {
+	return $resource("/spa/groups/resource/:id", {
+		id: "@id"
 	}, {
 		update: {
-			method: 'PUT'
+			method: "PUT"
 		}
 	});
 });
 
-app.factory('User', function($resource) {
-	return $resource('/spa/users/resource/:id', {
-		id: '@id'
+app.factory("User", function($resource) {
+	return $resource("/spa/users/resource/:id", {
+		id: "@id"
 	}, {
 		update: {
-			method: 'PUT'
+			method: "PUT"
 		}
 	});
 });
 
-app.factory('Message', function($resource) {
-	return $resource('/spa/inbox/resource/:id');
+app.factory("Message", function($resource) {
+	return $resource("/spa/inbox/resource/:id");
 });
 
-app.factory('ChatMessage', function($resource, $http) {
-	var resource = $resource('/spa/chatMessage/resource/:id');
+app.factory("ChatMessage", function($resource, $http) {
+	var resource = $resource("/spa/chatMessage/resource/:id");
 
 	// Adding extensions methods to allow complex data quering
 	resource.$extensions = {};
 	resource.$extensions.findAllByReceiver = function(id) {
-		var promise = $http.post('/spa/chatMessage/resource/findAllByReceiver', id);
+		var promise = $http.post("/spa/chatMessage/resource/findAllByReceiver", id);
 		return promise;
 	};
 
 	return resource;
 });
 
-app.directive('myEnter', function() {
+app.directive("myEnter", function() {
 	return function(scope, element, attrs) {
 		element.bind("keydown keypress", function(event) {
 			if (event.which === 13) {
@@ -191,47 +191,47 @@ app.directive('myEnter', function() {
 	};
 });
 
-app.controller('Main', ['$scope', '$state', 'Socket', function($scope, $state, Socket) {
-	if (localStorage.getItem('jwt') != null) {
+app.controller("Main", ["$scope", "$state", "Socket", function($scope, $state, Socket) {
+	if (localStorage.getItem("jwt") != null) {
 		$scope.loggedIn = true;
 		$scope.user = JSON.parse(localStorage.user);
 	}
 
 	$scope.showChat = function() {
-		$('.chat-menu').show();
+		$(".chat-menu").show();
 	}
 
 	$scope.logout = function() {
-		localStorage.removeItem('jwt');
-		localStorage.removeItem('user');
+		localStorage.removeItem("jwt");
+		localStorage.removeItem("user");
 		$scope.loggedIn = false;
 
-		Socket.emit('logout');
+		Socket.emit("logout");
 
-		$state.go('index');
+		$state.go("index");
 	}
 }]);
 
-app.controller('AuthLogin', ['$scope', '$http', '$state', 'Socket', '$stateParams', function($scope, $http, $state, Socket, $stateParams) {
+app.controller("AuthLogin", ["$scope", "$http", "$state", "Socket", "$stateParams", function($scope, $http, $state, Socket, $stateParams) {
 
 	if (window.localStorage.jwt) {
-		$state.go('index');
+		$state.go("index");
 	}
 
 	$scope.forgotPassword = function() {
-		$state.go('auth/forgotPassword');
+		$state.go("auth/forgotPassword");
 	};
 
 	$scope.processForm = function() {
 		var request = $http({
-			method: 'POST',
-			url: '/spa/auth/login',
+			method: "POST",
+			url: "/spa/auth/login",
 			data: $.param({
 				studentnumber: $scope.studentNumber,
 				password: $scope.password
 			}),
 			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded'
+				'Content-Type': "application/x-www-form-urlencoded"
 			}
 		});
 		request.success(function(data) {
@@ -243,35 +243,35 @@ app.controller('AuthLogin', ['$scope', '$http', '$state', 'Socket', '$stateParam
 			window.localStorage.jwt = data.token;
 			window.localStorage.user = JSON.stringify(data.user);
 
-			Socket.emit('login', localStorage.getItem('jwt'), function(err, user) {
+			Socket.emit("login", localStorage.getItem("jwt"), function(err, user) {
 				if (err) {
 
 				}
 			});
 
-			$state.go($stateParams.redirectState ? $stateParams.redirectState : 'index');
+			$state.go($stateParams.redirectState ? $stateParams.redirectState : "index");
 		});
 	};
 }]);
 
-app.controller('AuthRegister', ['$scope', '$http', '$state', function($scope, $http, $state) {
+app.controller("AuthRegister", ["$scope", "$http", "$state", function($scope, $http, $state) {
 
 	if (window.localStorage.jwt) {
-		$state.go('index');
+		$state.go("index");
 	}
 
 	$scope.processForm = function() {
-		$scope.errorMsg = '';
-		$scope.msg = '';
+		$scope.errorMsg = "";
+		$scope.msg = "";
 
 		var request = $http({
-			method: 'POST',
-			url: '/spa/auth/register',
+			method: "POST",
+			url: "/spa/auth/register",
 			data: $.param({
 				studentnumber: $scope.studentnumber
 			}),
 			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded'
+				'Content-Type': "application/x-www-form-urlencoded"
 			}
 		});
 		request.success(function(data) {
@@ -284,22 +284,22 @@ app.controller('AuthRegister', ['$scope', '$http', '$state', function($scope, $h
 	};
 }]);
 
-app.controller('ProfileShow', ['$scope', '$http', '$stateParams', '$state', function($scope, $http, $stateParams, $state) {
+app.controller("ProfileShow", ["$scope", "$http", "$stateParams", "$state", function($scope, $http, $stateParams, $state) {
 	if (!$scope.loggedIn) {
-		$state.go('auth/login');
+		$state.go("auth/login");
 		return;
 	}
 
 	$scope.changeProfile = function() {
 		var request = $http({
-			method: 'POST',
-			url: '/spa/profile/resource/ChangeProfile',
+			method: "POST",
+			url: "/spa/profile/resource/ChangeProfile",
 			data: $.param({
 				hobby: $scope.hobby,
 				studentNumber: $stateParams.studentNumber
 			}),
 			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded'
+				'Content-Type': "application/x-www-form-urlencoded"
 			}
 		});
 		request.success(function(data) {
@@ -318,15 +318,15 @@ app.controller('ProfileShow', ['$scope', '$http', '$stateParams', '$state', func
 	var studentNumber = $stateParams.studentNumber;
 
 	var request = $http({
-		method: 'GET',
-		url: '/spa/profile/resource/' + studentNumber,
+		method: "GET",
+		url: "/spa/profile/resource/" + studentNumber,
 	});
 	request.error(function(data, status) {
 		if (status == 404) {
 			// Student niet gevonden
 
-			$state.go('index');
-			alert('Student not found');
+			$state.go("index");
+			alert("Student not found");
 			return;
 		}
 	});
@@ -348,7 +348,7 @@ app.controller('ProfileShow', ['$scope', '$http', '$stateParams', '$state', func
 
 }]);
 
-app.controller('Inbox', ['$scope', '$state', 'Message', function($scope, $state, Message) {
+app.controller("Inbox", ["$scope", "$state", "Message", function($scope, $state, Message) {
 	$scope.messages = [];
 	Message.query(function(messages) {
 		for (var i = messages.length - 1; i >= 0; i--) {
@@ -357,23 +357,23 @@ app.controller('Inbox', ['$scope', '$state', 'Message', function($scope, $state,
 		$scope.messages = messages;
 	});
 	$scope.rowClicked = function(id) {
-		$state.go('inbox/show', {
+		$state.go("inbox/show", {
 			id: id
 		});
 	};
 	$scope.addNew = function() {
-		$state.go('inbox/create');
+		$state.go("inbox/create");
 	};
 }]);
 
-app.controller('InboxShow', ['$scope', '$state', '$stateParams', '$sce', 'Message', function($scope, $state, $stateParams, $sce, Message) {
+app.controller("InboxShow", ["$scope", "$state", "$stateParams", "$sce", "Message", function($scope, $state, $stateParams, $sce, Message) {
 	Message.get({
 		id: $stateParams.id
 	}, function(message) {
 		message.date = new Date(message.created_at);
 
 		// Add in enters
-		message.content = $sce.trustAsHtml(message.content.replace(/\r\n|\r|\n/g, '<br/>'));
+		message.content = $sce.trustAsHtml(message.content.replace(/\r\n|\r|\n/g, "<br/>"));
 		$scope.message = message;
 	});
 
@@ -381,12 +381,12 @@ app.controller('InboxShow', ['$scope', '$state', '$stateParams', '$sce', 'Messag
 		Message.delete({
 			id: $scope.message._id
 		}, function() {
-			$state.go('inbox');
+			$state.go("inbox");
 		});
 	};
 }]);
 
-app.controller('InboxCreate', ['$scope', '$state', 'Message', 'User', function($scope, $state, Message, User) {
+app.controller("InboxCreate", ["$scope", "$state", "Message", "User", function($scope, $state, Message, User) {
 	User.query(function(users) {
 		// remove self from list
 		for (var i = 0; i < users.length; i++) {
@@ -408,7 +408,7 @@ app.controller('InboxCreate', ['$scope', '$state', 'Message', 'User', function($
 		$scope.users = users;
 
 		setTimeout(function() {
-			$('.selectpicker').selectpicker();
+			$(".selectpicker").selectpicker();
 		}, 50);
 	});
 
@@ -418,25 +418,25 @@ app.controller('InboxCreate', ['$scope', '$state', 'Message', 'User', function($
 		msg.content = $scope.content;
 		msg.receiverId = $scope.receiver;
 		msg.$save(function(err) {
-			$state.go('inbox');
+			$state.go("inbox");
 		});
 	};
 }]);
 
-app.controller('AuthForgotPassword', ['$scope', '$http', '$state', function($scope, $http, $state) {
+app.controller("AuthForgotPassword", ["$scope", "$http", "$state", function($scope, $http, $state) {
 	$scope.processForm = function() {
-		$scope.errorMsg = '';
-		$scope.msg = '';
+		$scope.errorMsg = "";
+		$scope.msg = "";
 		var studentNumber = $scope.studentNumber;
 
 		var request = $http({
-			method: 'POST',
-			url: '/spa/auth/forgotPassword/',
+			method: "POST",
+			url: "/spa/auth/forgotPassword/",
 			data: $.param({
 				studentNumber: studentNumber
 			}),
 			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded'
+				'Content-Type': "application/x-www-form-urlencoded"
 			}
 		});
 
@@ -453,12 +453,12 @@ app.controller('AuthForgotPassword', ['$scope', '$http', '$state', function($sco
 	};
 }]);
 
-app.controller('AuthForgotPasswordVerify', ['$scope', '$http', '$stateParams', '$state', function($scope, $http, $stateParams, $state) {
+app.controller("AuthForgotPasswordVerify", ["$scope", "$http", "$stateParams", "$state", function($scope, $http, $stateParams, $state) {
 	var code = $stateParams.verificationCode;
 
 	var request = $http({
-		method: 'GET',
-		url: '/spa/auth/forgotPasswordData/' + code,
+		method: "GET",
+		url: "/spa/auth/forgotPasswordData/" + code,
 	});
 	request.success(function(data) {
 		var reg = data.passwordReset;
@@ -473,17 +473,17 @@ app.controller('AuthForgotPasswordVerify', ['$scope', '$http', '$stateParams', '
 	});
 
 	$scope.processForm = function() {
-		$scope.errorMsg = '';
-		$scope.msg = '';
+		$scope.errorMsg = "";
+		$scope.msg = "";
 
 		if ($scope.password != $scope.repassword) {
-			$scope.errorMsg = 'Wachtwoorden komen niet overeen';
+			$scope.errorMsg = "Wachtwoorden komen niet overeen";
 			return;
 		}
 
 		$http({
-			method: 'POST',
-			url: '/spa/auth/forgotPassword/verify',
+			method: "POST",
+			url: "/spa/auth/forgotPassword/verify",
 			data: $.param({
 				studentnumber: $scope.studentnumber,
 				verificationCode: code,
@@ -491,7 +491,7 @@ app.controller('AuthForgotPasswordVerify', ['$scope', '$http', '$stateParams', '
 				repassword: $scope.repassword
 			}),
 			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded'
+				'Content-Type': "application/x-www-form-urlencoded"
 			}
 		}).success(function(data) {
 			if (data.err) {
@@ -505,19 +505,19 @@ app.controller('AuthForgotPasswordVerify', ['$scope', '$http', '$stateParams', '
 			if (data.stateChange) {
 				$state.go(data.stateChange);
 			} else {
-				$state.go('auth/login');
+				$state.go("auth/login");
 			}
 		});
 	};
 
 }]);
 
-app.controller('AuthRegisterVerify', ['$scope', '$http', '$stateParams', '$state', function($scope, $http, $stateParams, $state) {
+app.controller("AuthRegisterVerify", ["$scope", "$http", "$stateParams", "$state", function($scope, $http, $stateParams, $state) {
 	var code = $stateParams.verificationCode;
 
 	var request = $http({
-		method: 'GET',
-		url: '/spa/auth/register/verifyData/' + code,
+		method: "GET",
+		url: "/spa/auth/register/verifyData/" + code,
 	});
 	request.success(function(data) {
 		var reg = data.registration;
@@ -532,17 +532,17 @@ app.controller('AuthRegisterVerify', ['$scope', '$http', '$stateParams', '$state
 	});
 
 	$scope.processForm = function() {
-		$scope.errorMsg = '';
-		$scope.msg = '';
+		$scope.errorMsg = "";
+		$scope.msg = "";
 
 		if ($scope.password != $scope.repassword) {
-			$scope.errorMsg = 'Wachtwoorden komen niet overeen';
+			$scope.errorMsg = "Wachtwoorden komen niet overeen";
 			return;
 		}
 
 		$http({
-			method: 'POST',
-			url: '/spa/auth/register/verify',
+			method: "POST",
+			url: "/spa/auth/register/verify",
 			data: $.param({
 				studentnumber: $scope.studentnumber,
 				verificationCode: code,
@@ -552,7 +552,7 @@ app.controller('AuthRegisterVerify', ['$scope', '$http', '$stateParams', '$state
 				repassword: $scope.repassword
 			}),
 			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded'
+				'Content-Type': "application/x-www-form-urlencoded"
 			}
 		}).success(function(data) {
 			if (data.err) {
@@ -566,7 +566,7 @@ app.controller('AuthRegisterVerify', ['$scope', '$http', '$stateParams', '$state
 	};
 }]);
 
-app.controller('Groups', ['$scope', '$state', 'Group', function($scope, $state, Group) {
+app.controller("Groups", ["$scope", "$state", "Group", function($scope, $state, Group) {
 	$scope.groups = [];
 	Group.query(function(groups) {
 		$scope.groups = groups;
@@ -581,7 +581,7 @@ app.controller('Groups', ['$scope', '$state', 'Group', function($scope, $state, 
 	}
 
 	$scope.groupMouseClick = function(event, id) {
-		$state.go('groups/show', {
+		$state.go("groups/show", {
 			groupId: id
 		});
 	}
@@ -591,13 +591,13 @@ app.controller('Groups', ['$scope', '$state', 'Group', function($scope, $state, 
 			return;
 		}
 
-		$state.go('groups/create');
+		$state.go("groups/create");
 	};
 }]);
 
-app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function($scope, $state, Group, User) {
+app.controller("GroupsCreate", ["$scope", "$state", "Group", "User", function($scope, $state, Group, User) {
 	if (!$scope.loggedIn) {
-		$state.go('auth/login');
+		$state.go("auth/login");
 		return;
 	}
 
@@ -622,7 +622,7 @@ app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function($s
 		$scope.users = users;
 
 		setTimeout(function() {
-			$('.selectpicker').selectpicker();
+			$(".selectpicker").selectpicker();
 		}, 50);
 	});
 
@@ -634,21 +634,21 @@ app.controller('GroupsCreate', ['$scope', '$state', 'Group', 'User', function($s
 		});
 
 		group.$save(function() {
-			$state.go('groups');
+			$state.go("groups");
 		});
 	};
 }]);
 
-app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group', 'Socket', function($scope, $http, $stateParams, $state, Group, Socket) {
+app.controller("GroupShow", ["$scope", "$http", "$stateParams", "$state", "Group", "Socket", function($scope, $http, $stateParams, $state, Group, Socket) {
 
 	$scope.groupManageClicked = function() {
-		$state.go('group/manage', {
+		$state.go("group/manage", {
 			groupId: $scope.group._id
 		});
 	};
 
 	$scope.groupChatClicked = function() {
-		$state.go('group/chat', {
+		$state.go("group/chat", {
 			groupId: $scope.group._id
 		});
 	};
@@ -657,7 +657,7 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 		id: $stateParams.groupId
 	}, function(group) {
 		$scope.group = group;
-		$scope.joinGroupText = 'Aanvraag tot groep verzoeken';
+		$scope.joinGroupText = "Aanvraag tot groep verzoeken";
 
 		if ($scope.user.jwt == $scope.group.owner.jwt) {
 			$scope.isGroupOwner = true;
@@ -672,7 +672,7 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 		for (var i = $scope.group.invitations.length - 1; i >= 0; i--) {
 			if ($scope.group.invitations[i]._id == $scope.user._id) {
 				// The current user has been invited to the group
-				$scope.joinGroupText = 'Groep Uitnodiging Accepteren';
+				$scope.joinGroupText = "Groep Uitnodiging Accepteren";
 				$scope.user.hasBeenInvitedToGroup = true;
 			}
 		}
@@ -688,7 +688,7 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 	});
 
 	$scope.goToGroupMemberProfile = function(studentNumber) {
-		$state.go('profile/show', {
+		$state.go("profile/show", {
 			studentNumber: studentNumber
 		});
 	}
@@ -704,7 +704,7 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 
 			// reindex array
 			$scope.group.invitations.filter(function(val) {
-				return val
+				return val;
 			});
 
 			// add to users list
@@ -722,7 +722,7 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 			});
 		});
 
-		Socket.emit('GroupChat/RejoinGroups');
+		Socket.emit("GroupChat/RejoinGroups");
 	};
 
 	$scope.removeGroupMember = function(studentNumber) {
@@ -743,38 +743,38 @@ app.controller('GroupShow', ['$scope', '$http', '$stateParams', '$state', 'Group
 	}
 }]);
 
-app.controller('GroupChat', ['$scope', '$stateParams', '$state', 'Group', 'User', 'Socket', 'ChatMessage', function($scope, $stateParams, $state, Group, User, Socket, ChatMessage) {
+app.controller("GroupChat", ["$scope", "$stateParams", "$state", "Group", "User", "Socket", "ChatMessage", function($scope, $stateParams, $state, Group, User, Socket, ChatMessage) {
 
 	$scope.groupManageClicked = function() {
-		$state.go('group/manage', {
+		$state.go("group/manage", {
 			groupId: $scope.group._id
 		});
 	};
 
 	$scope.groupShowClicked = function() {
-		$state.go('groups/show', {
+		$state.go("groups/show", {
 			groupId: $scope.group._id
 		});
 	};
 
-	var messagesDiv = $('#groupchat-messages');
+	var messagesDiv = $("#groupchat-messages");
 	$scope.$watch(function() {
-		return messagesDiv.prop('scrollHeight');
+		return messagesDiv.prop("scrollHeight");
 	}, function() {
 		setTimeout(function() {
-			messagesDiv.scrollTop(messagesDiv.prop('scrollHeight'));
+			messagesDiv.scrollTop(messagesDiv.prop("scrollHeight"));
 		}, 50);
 	});
 
-	Socket.on('GroupChat/Client/Message/New', function(data) {
-		console.log('New chat msg', data);
+	Socket.on("GroupChat/Client/Message/New", function(data) {
+		console.log("New chat msg", data);
 
 		$scope.$apply(function() {
 			$scope.messages.push(data);
 		});
 	});
 
-	Socket.on('GroupChat/Client/Message/Edit', function(msgId, content) {
+	Socket.on("GroupChat/Client/Message/Edit", function(msgId, content) {
 		console.log("Edit here: ", msgId, content);
 		for (var i = 0; i < $scope.messages.length; i++) {
 			if ($scope.messages[i]._id == msgId) {
@@ -786,14 +786,14 @@ app.controller('GroupChat', ['$scope', '$stateParams', '$state', 'Group', 'User'
 	});
 
 	$scope.addMessage = function(msg) {
-		$scope.msg = '';
+		$scope.msg = "";
 
 		// Check if whitespace or spaces only
 		if (/^\s*$/.test(msg)) {
 			return;
 		}
 
-		socket.emit('GroupChat/Message/New', {
+		socket.emit("GroupChat/Message/New", {
 			receiver: $scope.group._id,
 			sender: $scope.user,
 			content: msg
@@ -848,16 +848,16 @@ app.controller('GroupChat', ['$scope', '$stateParams', '$state', 'Group', 'User'
 
 }]);
 
-app.controller('GroupManage', ['$scope', '$http', '$stateParams', '$state', 'Group', 'User', 'Message', 'Socket', function($scope, $http, $stateParams, $state, Group, User, Message, Socket) {
+app.controller("GroupManage", ["$scope", "$http", "$stateParams", "$state", "Group", "User", "Message", "Socket", function($scope, $http, $stateParams, $state, Group, User, Message, Socket) {
 
 	$scope.goToGroupMemberProfile = function(studentNumber) {
-		$state.go('profile/show', {
+		$state.go("profile/show", {
 			studentNumber: studentNumber
 		});
 	};
 
 	$scope.groupChatClicked = function() {
-		$state.go('group/chat', {
+		$state.go("group/chat", {
 			groupId: $scope.group._id
 		});
 	};
@@ -866,12 +866,10 @@ app.controller('GroupManage', ['$scope', '$http', '$stateParams', '$state', 'Gro
 		id: $stateParams.groupId
 	}, function(group) {
 		$scope.group = group;
-		if ($scope.user.jwt == $scope.group.owner.jwt) 
-		{
+		if ($scope.user.jwt == $scope.group.owner.jwt)  {
 			$scope.isGroupOwner = true;
-		} else 
-		{
-			$state.go('groups/show', {
+		} else {
+			$state.go("groups/show", {
 				groupId: id
 			});
 		}
@@ -915,17 +913,16 @@ app.controller('GroupManage', ['$scope', '$http', '$stateParams', '$state', 'Gro
 
 			$scope.invitationsSelectPicker = users;
 			setTimeout(function() {
-				$('.selectpicker').selectpicker();
+				$(".selectpicker").selectpicker();
 			}, 50);
 		});
 
             $scope.SendInvitations = function () {
 			for (var i = 0; i < $scope.invitations.length; i++) {
 				var userId = $scope.invitations[i];
-
-                var msg = new Message();
-				msg.title = 'Je hebt een groeps uitnodiging ontvangen van de groep: ' + $scope.group.name;
-				msg.content = 'You have been invited to ' + $scope.group.name + '.\n Click the link <a href="/#/groups/show/' + $scope.group._id + '">here</a> to see the group';
+				var msg = new Message();
+				msg.title = "Je hebt een groeps uitnodiging ontvangen van de groep: " + $scope.group.name;
+				msg.content = "You have been invited to " + $scope.group.name + '.\n Click the link <a href="/#/groups/show/' + $scope.group._id + '">here</a> to see the group';
 				msg.receiverId = userId;
 				msg.$save(function(err) {
 
@@ -980,7 +977,7 @@ app.controller('GroupManage', ['$scope', '$http', '$stateParams', '$state', 'Gro
 				$state.go($state.current, {}, {
 					reload: true
 				});
-				Socket.emit('GroupChat/RejoinGroups', {
+				Socket.emit("GroupChat/RejoinGroups", {
 					id: joinRequest._id 
 				});
 			});
@@ -1021,30 +1018,30 @@ app.controller('GroupManage', ['$scope', '$http', '$stateParams', '$state', 'Gro
 		}
 
 		$scope.groupShowClicked = function() {
-			$state.go('groups/show', {
+			$state.go("groups/show", {
 				groupId: $scope.group._id
 			});
 		}
 	});
 }]);
 
-app.controller('ChatMenuController', ['$scope', function($scope) {
-	var overlay = $('.chat-menu');
+app.controller("ChatMenuController", ["$scope", function($scope) {
+	var overlay = $(".chat-menu");
 	$scope.close = function() {
 		overlay.hide();
 	};
 }]);
 
-app.controller('GamesController', ['$scope', '$state', '$stateParams', function ($scope, $state, $stateParams) {
+app.controller("GamesController", ["$scope", "$state", "$stateParams", function ($scope, $state, $stateParams) {
 	$scope.tournamentGamePotraitViewClick = function(gameName) {
-		$state.go('games/show', { gameName: gameName });
+		$state.go("games/show", { gameName: gameName });
 	};
 }]);
 
-app.controller('GamesShowController', ['$scope', '$state', '$stateParams', '$http', function ($scope, $state, $stateParams, $http) {
+app.controller("GamesShowController", ["$scope", "$state", "$stateParams", "$http", function ($scope, $state, $stateParams, $http) {
 	$http({
-		method: 'GET',
-		url: '/spa/games/show/' + $stateParams.gameName
+		method: "GET",
+		url: "/spa/games/show/" + $stateParams.gameName
 	}).then(successRes => {
 		if (successRes.status != 200) {
 			// Game not found
@@ -1058,6 +1055,6 @@ app.controller('GamesShowController', ['$scope', '$state', '$stateParams', '$htt
 	});
 }]);
 
-app.controller('MyGamesController', ['$scope', '$state', function($scope, $state) {
+app.controller("MyGamesController", ["$scope", "$state", function($scope, $state) {
 
 }]);

@@ -1,7 +1,7 @@
-'use strict';
+"use strict";
 
-const config = require('../config');
-const expressJwt = require('express-jwt');
+const config = require("../config");
+const expressJwt = require("express-jwt");
 
 module.exports = function (priveleges) {
 	return function (req, res, next) {
@@ -18,6 +18,6 @@ module.exports = function (priveleges) {
 			next();
 			return;
 		}
-		res.json({ err: 'Unauthorized, you don\'t have the required priveleges' });
+		res.json({ err: "Unauthorized, you don't have the required priveleges" });
 	};
 };

@@ -1,29 +1,29 @@
-'use strict';
+"use strict";
 
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const randomstring = require('randomstring');
-const apiCall = require('../../modules/apiCall');
+const randomstring = require("randomstring");
+const apiCall = require("../../modules/apiCall");
 
-const User = require('../../models/user.js');
-const Registration = require('../../models/registration.js');
-const BlockedUserLogin = require('../../models/blockedUserLogin.js');
-const PasswordReset = require('../../models/password-reset.js');
+const User = require("../../models/user.js");
+const Registration = require("../../models/registration.js");
+const BlockedUserLogin = require("../../models/blockedUserLogin.js");
+const PasswordReset = require("../../models/password-reset.js");
 
-const config = require('../../config');
-const jwt = require('jsonwebtoken');
-const requiredPostParams = require('../../middleware/requiredPostParams.js');
+const config = require("../../config");
+const jwt = require("jsonwebtoken");
+const requiredPostParams = require("../../middleware/requiredPostParams.js");
 
-const mailer = require('../../modules/mailer');
+const mailer = require("../../modules/mailer");
 
 
 // Add routes here
-router.get('/login', function (req, res) {
-	res.render('spa/auth/login');
+router.get("/login", function (req, res) {
+	res.render("spa/auth/login");
 });
 
-router.post('/login', requiredPostParams(['password', 'studentnumber']), function (req, res) {
+router.post("/login", requiredPostParams(["password", "studentnumber"]), function (req, res) {
 	const form = req.body;
 	// Store the current time
 	var now = new Date(new Date() + 60 * 60000); // + 60 * 60000
@@ -38,13 +38,13 @@ router.post('/login', requiredPostParams(['password', 'studentnumber']), functio
 			
 			// Studentnumber is a number
 			if (isNaN(studentNumber)) {
-				res.json({ err: 'Student nummer moet een getal zijn' });		
+				res.json({ err: "Student nummer moet een getal zijn" });		
 				return;
 			}
 			
 			// Studentnumber is 8 numbers in length
 			if (studentNumber.length != 8) {
-				res.json({ err: 'Studentnummer moet 8 getallen zijn' });
+				res.json({ err: "Studentnummer moet 8 getallen zijn" });
 				return;
 			}
 
@@ -53,7 +53,7 @@ router.post('/login', requiredPostParams(['password', 'studentnumber']), functio
 				// User wasnt found
 				if (!user) {
 					// Respond with user not found
-					res.json({ err: 'Incorrect studentnummer en/of wachtwoord' });
+					res.json({ err: "Incorrect studentnummer en/of wachtwoord" });
 					return;
 				}
 				
@@ -66,7 +66,7 @@ router.post('/login', requiredPostParams(['password', 'studentnumber']), functio
 							blockedUserLogin = new BlockedUserLogin({ blockedIp: req.connection.remoteAddress, timesFailed: 1 });
 
 							// Respond to the client with a wrong password
-							res.json({ err: 'Incorrect studentnummer en/of wachtwoord' });
+							res.json({ err: "Incorrect studentnummer en/of wachtwoord" });
 						} else {
 							blockedUserLogin.timesFailed++;
 							if (blockedUserLogin.blockedTillDate) {
@@ -75,9 +75,9 @@ router.post('/login', requiredPostParams(['password', 'studentnumber']), functio
 								var blockEndDate = new Date(now.getTime() + waitTime);
 								blockedUserLogin.blockedTillDate = blockEndDate;
 
-								res.json({ err: 'U heeft te vaak een verkeerde inlog poging gehad, u kunt weer over ' + Math.ceil(waitTime / 60 / 100) + ' minuten proberen in te loggen' });
+								res.json({ err: "U heeft te vaak een verkeerde inlog poging gehad, u kunt weer over " + Math.ceil(waitTime / 60 / 100) + " minuten proberen in te loggen" });
 							} else {
-								res.json({ err: 'Incorrect studentnummer en/of wachtwoord, nog ' + ((config.auth.blockedLoginMaxTries - blockedUserLogin.timesFailed) + 1) + ' poging(en) tot je voor een bepaalde tijd niet kan inloggen' });
+								res.json({ err: "Incorrect studentnummer en/of wachtwoord, nog " + ((config.auth.blockedLoginMaxTries - blockedUserLogin.timesFailed) + 1) + " poging(en) tot je voor een bepaalde tijd niet kan inloggen" });
 							}
 						}
 						// save it to the database
@@ -107,40 +107,40 @@ router.post('/login', requiredPostParams(['password', 'studentnumber']), functio
 
 		var waitTime = (Math.pow(config.auth.blockedLoginIncremental, blockedUserLogin.timesFailed - config.auth.blockedLoginMaxTries - 1) || 1)  * (config.auth.blockedLoginInitialTime * 100);
 		
-		res.json({ err: 'U heeft te vaak een verkeerde inlog poging gehad, u kunt weer over ' + Math.ceil(waitTime / 60 / 100) + ' minuten proberen in te loggen' });
+		res.json({ err: "U heeft te vaak een verkeerde inlog poging gehad, u kunt weer over " + Math.ceil(waitTime / 60 / 100) + " minuten proberen in te loggen" });
 		return;
 	});
 });
 
-router.get('/register', function (req, res) {
-	res.render('spa/auth/register');
+router.get("/register", function (req, res) {
+	res.render("spa/auth/register");
 });
 
-router.post('/register', requiredPostParams(['studentnumber']), function (req, res) {
+router.post("/register", requiredPostParams(["studentnumber"]), function (req, res) {
 	const form = req.body;
 	
 	if (isNaN(form.studentnumber)) {
-		res.json({ err: 'Studentnummer moet een getal zijn' });
+		res.json({ err: "Studentnummer moet een getal zijn" });
 		return;
 	}
 	
 	if (form.studentnumber.length != 8) {
-		res.json({ err: 'Studentnummer moet 8 getallen zijn' });
+		res.json({ err: "Studentnummer moet 8 getallen zijn" });
 		return;
 	}
 	
 	User.findOne({ studentnumber: parseInt(form.studentnumber) }, function (err, localUser) {
 		if (localUser) {
-			res.json({ err: 'Deze student is al geregistreerd' });
+			res.json({ err: "Deze student is al geregistreerd" });
 			return;
 		}
 		
-		const email = form.studentnumber + '@mydavinci.nl';
+		const email = form.studentnumber + "@mydavinci.nl";
 		const studentnumber = parseInt(form.studentnumber);
 
 		Registration.findOne({ studentnumber: studentnumber }, function (err, registration) {
 			if (registration) {
-				res.json({ err: 'Er is al een email gestuurd naar dit studentnummer' });
+				res.json({ err: "Er is al een email gestuurd naar dit studentnummer" });
 				return;
 			}
 			
@@ -153,20 +153,20 @@ router.post('/register', requiredPostParams(['studentnumber']), function (req, r
 			
 			reg.save(function (err, saveResult) {
 				if (err) {
-					res.json({ err: 'Interne server fout' });
+					res.json({ err: "Interne server fout" });
 				}
 				const data = {
-					from: 'info@gametournament.nl',
+					from: "info@gametournament.nl",
 					to: email,
-					subject: 'Account Activatie',
-					text: 'Beste Leerling,\n\nDruk op deze link om jouw account aan te maken ' + config.site + '/#/auth/register/' + code + '\n\nMet vriendelijke groet,\n\nHet game tournament team'
+					subject: "Account Activatie",
+					text: "Beste Leerling,\n\nDruk op deze link om jouw account aan te maken " + config.site + "/#/auth/register/" + code + "\n\nMet vriendelijke groet,\n\nHet game tournament team"
 				};
 				
 				mailer.sendMail(data, function (err, info) {
 					if (!err) {
-						res.json({ msg: 'Er is een email naar ' + email + ' gestuurd.' });
+						res.json({ msg: "Er is een email naar " + email + " gestuurd." });
 					} else {
-						res.json({ err: 'Er is een fout opgetreden, probeer het later overnieuw.' });
+						res.json({ err: "Er is een fout opgetreden, probeer het later overnieuw." });
 					}
 				});
 			});
@@ -174,29 +174,29 @@ router.post('/register', requiredPostParams(['studentnumber']), function (req, r
 	});
 });
 
-router.get('/forgotPassword', function (req, res) { 
-	res.render('spa/auth/forgotPassword');
+router.get("/forgotPassword", function (req, res) { 
+	res.render("spa/auth/forgotPassword");
 });
 
-router.post('/forgotPassword', requiredPostParams(['studentNumber']), function (req, res) {
+router.post("/forgotPassword", requiredPostParams(["studentNumber"]), function (req, res) {
 	const form = req.body;
 
 	const password = form.password;
 	const studentNumber = form.studentNumber;
 
 	if (isNaN(studentNumber)) {
-		res.json({ err: 'Studentnummer moet een getal zijn' });
+		res.json({ err: "Studentnummer moet een getal zijn" });
 		return;
 	}
 
 	if (studentNumber.length != 8) {
-		res.json({ err: 'Studentnummer moet 8 getallen zijn' });
+		res.json({ err: "Studentnummer moet 8 getallen zijn" });
 		return;
 	}
 
 	User.findOne({ studentnumber: studentNumber }, function (err, user) {
 		if (!user) {
-			res.json({ err: 'Deze student heeft nog geen account geregistreerd' });
+			res.json({ err: "Deze student heeft nog geen account geregistreerd" });
 			return;
 		}
 
@@ -205,7 +205,7 @@ router.post('/forgotPassword', requiredPostParams(['studentNumber']), function (
 				return;
 			}
 			if (passwordReset) {
-				res.json({ err: 'Deze student heeft al een wachtwoord reset aangevraagd' });
+				res.json({ err: "Deze student heeft al een wachtwoord reset aangevraagd" });
 				return;
 			}
 
@@ -218,20 +218,20 @@ router.post('/forgotPassword', requiredPostParams(['studentNumber']), function (
 
 			passReset.save();
 
-			const email = studentNumber + '@mydavinci.nl';
+			const email = studentNumber + "@mydavinci.nl";
 
 			const data = {
-				from: 'info@gametournament.nl',
+				from: "info@gametournament.nl",
 				to: email,
-				subject: 'Wachtwoord Vergeten',
-				text: 'Beste Leerling,\n\nDruk op deze link om jouw wachtwoord te resetten ' + config.site + '/#/auth/forgotPassword/' + code + '\n\nMet vriendelijke groet,\n\nHet game tournament team'
+				subject: "Wachtwoord Vergeten",
+				text: "Beste Leerling,\n\nDruk op deze link om jouw wachtwoord te resetten " + config.site + "/#/auth/forgotPassword/" + code + "\n\nMet vriendelijke groet,\n\nHet game tournament team"
 			};
 
 			mailer.sendMail(data, function (err, info) {
 				if (!err) {
-					res.json({ msg: 'Er is een email naar ' + email + ' gestuurd.' });
+					res.json({ msg: "Er is een email naar " + email + " gestuurd." });
 				} else {
-					res.json({ err: 'Er is een fout opgetreden, probeer het later overnieuw.' });
+					res.json({ err: "Er is een fout opgetreden, probeer het later overnieuw." });
 				}
 			});
 
@@ -239,22 +239,22 @@ router.post('/forgotPassword', requiredPostParams(['studentNumber']), function (
 	});
 });
 
-router.get('/forgotPassword/verify', function (req, res) {
-	res.render('spa/auth/forgotPassword/verify');
+router.get("/forgotPassword/verify", function (req, res) {
+	res.render("spa/auth/forgotPassword/verify");
 });
 
-router.get('/forgotPasswordData/:verificationCode', function (req, res) {
+router.get("/forgotPasswordData/:verificationCode", function (req, res) {
 	const code = req.params.verificationCode;
 	PasswordReset.findOne({ verificationCode: code }, function (err, passReset) {
 		if (err) {
 			res.json({
-				err: 'Er is een fout opgetreden, probeer het later opnieuw'
+				err: "Er is een fout opgetreden, probeer het later opnieuw"
 			});
 			return;
 		}
 		if (!passReset) {
 			res.json({
-				err: 'Onjuiste verificatie code'
+				err: "Onjuiste verificatie code"
 			});
 			return;
 		}
@@ -264,22 +264,22 @@ router.get('/forgotPasswordData/:verificationCode', function (req, res) {
 	});
 });
 
-router.get('/register/verify', function (req, res) {
-	res.render('spa/auth/register/verify');
+router.get("/register/verify", function (req, res) {
+	res.render("spa/auth/register/verify");
 });
 
-router.get('/register/verifyData/:verificationCode', function (req, res) {
+router.get("/register/verifyData/:verificationCode", function (req, res) {
 	const code = req.params.verificationCode;
 	Registration.findOne({ verificationCode: code }, function (err, registration) {
 		if (err) {
 			res.json({
-				err: 'Er is een fout opgetreden, probeer het later opnieuw'
+				err: "Er is een fout opgetreden, probeer het later opnieuw"
 			});
 			return;
 		}
 		if (!registration) {
 			res.json({
-				err: 'Onjuiste verificatie code'
+				err: "Onjuiste verificatie code"
 			});
 			return;
 		}
@@ -289,30 +289,30 @@ router.get('/register/verifyData/:verificationCode', function (req, res) {
 	});
 });
 
-router.post('/forgotPassword/verify', requiredPostParams(['password', 'repassword', 'verificationCode', 'studentnumber']), function (req, res) {
+router.post("/forgotPassword/verify", requiredPostParams(["password", "repassword", "verificationCode", "studentnumber"]), function (req, res) {
 	const form = req.body;
 
 	if (form.password != form.repassword) {
-		res.json({ err: 'Wachtwoorden komen niet overeen' });
+		res.json({ err: "Wachtwoorden komen niet overeen" });
 		return;
 	}
 
 	PasswordReset.findOne({ studentnumber: form.studentnumber }, function (err, passwordReset) {
 		if (err) {
 			res.json({
-				err: 'Er is een fout opgetreden, probeer het later opnieuw'
+				err: "Er is een fout opgetreden, probeer het later opnieuw"
 			});
 			return;
 		}
 		if (!passwordReset) {
 			res.json({
-				err: 'Er bestaat geen reset voor dit studentnummer'
+				err: "Er bestaat geen reset voor dit studentnummer"
 			});
 			return;
 		}
 		if (passwordReset.verificationCode != form.verificationCode) {
 			res.json({
-				err: 'Nice try bitch'
+				err: "Nice try bitch"
 			});
 			return;
 		}
@@ -321,10 +321,10 @@ router.post('/forgotPassword/verify', requiredPostParams(['password', 'repasswor
 			passwordReset.remove();
 
 			apiCall({
-				method: 'post',
-				apiUrl: '/auth/changePassword',
+				method: "post",
+				apiUrl: "/auth/changePassword",
 				form: {
-					email: form.studentnumber + '@mydavinci.nl',
+					email: form.studentnumber + "@mydavinci.nl",
 					password: form.password,
 					oldpassword: localUser.password
 				}
@@ -337,37 +337,37 @@ router.post('/forgotPassword/verify', requiredPostParams(['password', 'repasswor
 				if (data.success) {
 					localUser.password = data.password;
 					localUser.save();
-					res.json({ msg: 'Wachtwoord gereset' });
+					res.json({ msg: "Wachtwoord gereset" });
 				}
 			});
 		});
 	});
 });
 
-router.post('/register/verify', requiredPostParams(['password', 'repassword', 'firstname', 'lastname', 'verificationCode', 'studentnumber']), function (req, res) {
+router.post("/register/verify", requiredPostParams(["password", "repassword", "firstname", "lastname", "verificationCode", "studentnumber"]), function (req, res) {
 	const form = req.body;
 
 	if (form.password != form.repassword) {
-		res.json({ err: 'Wachtwoorden komen niet overeen' });
+		res.json({ err: "Wachtwoorden komen niet overeen" });
 		return;
 	}
 
 	Registration.findOne({ studentnumber: form.studentnumber }, function (err, registration) {
 		if (err) {
 			res.json({
-				err: 'Er is een fout opgetreden, probeer het later opnieuw'
+				err: "Er is een fout opgetreden, probeer het later opnieuw"
 			});
 			return;
 		}
 		if (!registration) {
 			res.json({
-				err: 'Er bestaat geen registratie voor dit studentnummer'
+				err: "Er bestaat geen registratie voor dit studentnummer"
 			});
 			return;
 		}
 		if (registration.verificationCode != form.verificationCode) {
 			res.json({
-				err: 'Nice try bitch'
+				err: "Nice try bitch"
 			});
 			return;
 		}
@@ -375,10 +375,10 @@ router.post('/register/verify', requiredPostParams(['password', 'repassword', 'f
 		registration.remove();
 
 		apiCall({
-			method: 'post',
-			apiUri: '/auth/register',
+			method: "post",
+			apiUri: "/auth/register",
 			form: {
-				email: form.studentnumber + '@mydavinci.nl',
+				email: form.studentnumber + "@mydavinci.nl",
 				password: form.password
 			}
 		}, function (err, data) {
@@ -393,10 +393,10 @@ router.post('/register/verify', requiredPostParams(['password', 'repassword', 'f
 			localUser.studentnumber = parseInt(form.studentnumber);
 
 			apiCall({
-				method: 'post',
-				apiUri: '/auth/login',
+				method: "post",
+				apiUri: "/auth/login",
 				form: {
-					email: form.studentnumber + '@mydavinci.nl',
+					email: form.studentnumber + "@mydavinci.nl",
 					password: form.password
 				}
 			}, function (err, data) {
@@ -407,7 +407,7 @@ router.post('/register/verify', requiredPostParams(['password', 'repassword', 'f
 				localUser.jwt = data.token;
 				
 				localUser.save(function (err) {
-					res.json({ stateChange: 'auth/login' });
+					res.json({ stateChange: "auth/login" });
 				});
 			});
 		});

@@ -4,7 +4,7 @@ module.exports = function (params) {
 		for (var i = 0; i < params.length; i++) {
 			if (!req.body[params[i]]) {
 				res.status(400);
-				res.json({ err: 'Missing Parameter: ' + params[i] });
+				res.json({ err: "Missing Parameter: " + params[i] });
 				success = false;
 			}	
 		}		

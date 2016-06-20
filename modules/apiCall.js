@@ -1,8 +1,8 @@
-'use strict';
+"use strict";
 
-const request = require('request');
+const request = require("request");
 
-const config = require('../config');
+const config = require("../config");
 
 module.exports = function (settings, cb) {
 	const cfg = {
@@ -16,15 +16,15 @@ module.exports = function (settings, cb) {
 	}
 	
 	if (settings.jwt) {
-		cfg.headers.Authorization = 'Bearer ' + settings.jwt;
+		cfg.headers.Authorization = "Bearer " + settings.jwt;
 	}
 	
-	if (settings.method.toLowerCase() != 'get') {
-		cfg.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+	if (settings.method.toLowerCase() != "get") {
+		cfg.headers["Content-Type"] = "application/x-www-form-urlencoded";
 	}
 
 	if (!request[settings.method]) {
-		cb({ msg: 'Not a valid request method' }, null);
+		cb({ msg: "Not a valid request method" }, null);
 		return;
 	}
 
