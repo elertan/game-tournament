@@ -12,7 +12,7 @@ module.exports = new Promise((resolve, reject) => {
 	const files = fs.readdirSync(p);
 	files.forEach(file => {
 		ge.extensions.push(require(path.join(p, file)));
-		console.log('File: ' + file);
+		console.log('GameExtension Loaded: ' + file);
 	});
 	resolve(ge);
 });

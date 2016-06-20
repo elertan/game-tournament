@@ -10,6 +10,7 @@ router.use('/users', require('./spa/users'));
 router.use('/inbox', require('./spa/inbox'));
 router.use('/chatMessage', require('./spa/chatMessage'));
 router.use('/mygames', require('./spa/mygames'));
+router.use('/games', require('./spa/games'));
 
 router.get('/index', function (req, res) {
 	res.render('spa/index');

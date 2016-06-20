@@ -1,0 +1,10 @@
+extends ../main.jade
+
+block content
+	div(ng-controller="GamesController")
+		h1 Games
+		for extension in ge.extensions
+			div.col-md-3
+				div.tournamentGamePotraitView(style="background: url('#{extension.backgroundUrl}'); background-size: cover;" ng-click="tournamentGamePotraitViewClick('#{extension.shortname}')")
+					div(style="background: rgba(20, 20, 20, 0.5); height: 50px;")
+						h4(style="text-align: center; color: #fff;") #{extension.name}

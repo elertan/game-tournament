@@ -7,6 +7,34 @@ const ChatMessage = require('../models/chatMessage');
 const profanityCheck = require('../modules/profanityCheck');
 
 module.exports = function (io, socket) {
+	socket.on('GroupChat/RejoinGroups', data => {
+		if (!data) {
+			data = {};
+		}
+		const id = data.id || socket.user._doc._id;
+		Group.find({ $or: [{ owner: id }, { users: id }] }, (err, groups) => {
+			if (err) {
+				console.log(err);
+				return;
+			}
+			
+			for (var i = groups.length - 1; i >= 0; i--) {
+				var joinThisGroup = true;
+				for (var prop in io.sockets.adapter.sids[socket.id]) {
+					if (io.sockets.adapter.sids[socket.id].hasOwnProperty(prop)) {
+						if (prop == 'GroupChat/' + groups[i]._doc._id) {
+							joinThisGroup = false;
+							break;
+						}
+					}
+				}
+				if (joinThisGroup) {
+					socket.join('GroupChat/' + groups[i]._id);
+				}
+			}
+		});
+	});
+
 	socket.on('GroupChat/Message/New', data => {
 		co(function *() {
 			// Wait until profanityCheck initializes (adding words to the check)

@@ -13,7 +13,6 @@ require('../../modules/game-extensions').then(gExtensions => {
 
 router.get('/', isAuth, (req, res) => {
 	co(function *() {
-		console.log(ge);
 		res.render('spa/mygames/index', {
 			ge: ge
 		});

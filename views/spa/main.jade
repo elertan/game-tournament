@@ -7,7 +7,7 @@ div(ng-controller="Main")
 					span.icon-bar
 					span.icon-bar
 					span.icon-bar
-				a.navbar-brand(ui-sref="index") Game Tournament
+				a.navbar-brand(ui-sref="index" style="margin-left: -130;") Game Tournament
 			div#navbar.navbar-collapse.collapse
 				ul.nav.navbar-nav
 					li.active
@@ -24,10 +24,14 @@ div(ng-controller="Main")
 							i.fa.fa-group
 							| &nbsp;Groepen
 					li
+						a(ui-sref="games")
+							i.fa.fa-gamepad
+							| &nbsp;Games
+					li
 						a(ng-click="showChat()")
 							i.fa.fa-comments
 							| &nbsp;Chats
-				ul.nav.navbar-nav.navbar-right
+				ul.nav.navbar-nav.navbar-right(style="margin-right: -125px;")
 					li(ng-show="!loggedIn")
 						a(ui-sref="auth/login") Login
 					li(ng-show="!loggedIn")
@@ -54,7 +58,7 @@ div(ng-controller="Main")
 								a(ng-click="logout()")
 									i.fa.fa-sign-out
 									| &nbsp;Logout
-				
-	div.container(style="margin-top: 50px;")
-		block content
+	div(style="background: url('{{ backgroundImageUrl }}') no-repeat center center fixed; background-size: cover; position: absolute; top: 0px; bottom: 0; width: 100%;")
+		div.container(style="margin-top: 50px;")
+			block content
 block scripts
