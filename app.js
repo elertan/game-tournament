@@ -34,5 +34,5 @@ require("./socket/main")(socketIo);
 
 // Listen
 http.listen(config.port, function() {
-	console.log("Server is running on port " + config.port);
+    console.log("Server is running on port " + config.port);
 });

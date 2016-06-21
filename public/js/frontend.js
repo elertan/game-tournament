@@ -1038,7 +1038,7 @@ app.controller("GamesController", ["$scope", "$state", "$stateParams", function 
 	};
 }]);
 
-app.controller("GamesShowController", ["$scope", "$state", "$stateParams", "$http", function ($scope, $state, $stateParams, $http) {
+app.c1ontroller("GamesShowController", ["$scope", "$state", "$stateParams", "$http", function ($scope, $state, $stateParams, $http) {
 	$http({
 		method: "GET",
 		url: "/spa/games/show/" + $stateParams.gameName

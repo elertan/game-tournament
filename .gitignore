@@ -39,3 +39,8 @@ bower_components
 
 #typings
 typings
+
+#visual studio files
+obj
+*.njsproj
+*.sln
