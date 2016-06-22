@@ -102,6 +102,19 @@ app.factory("Socket", function() {
 	return socket;
 });
 
+app.directive('compile', function ($compile, $timeout) {
+	return {
+		restrict: 'A',
+		link: function (scope, elem, attrs) {
+			$timeout(function () {
+
+				$compile(elem.contents())(scope);
+			});
+		}
+
+	}
+});
+
 app.factory("CustomHttpInterceptor", ["$q", function($q) {
 	return {
 		response: function(response) {
@@ -1038,21 +1051,54 @@ app.controller("GamesController", ["$scope", "$state", "$stateParams", function 
 	};
 }]);
 
-app.controller("GamesShowController", ["$scope", "$state", "$stateParams", "$http", function ($scope, $state, $stateParams, $http) {
+app.controller("GamesShowController", ["$scope", "$state", "$stateParams", "$http", "$sce", function ($scope, $state, $stateParams, $http, $sce) {
+
+	$scope.joinGameParameters = {};
+	$scope.lastResult = {};
+
 	$http({
 		method: "GET",
 		url: "/spa/games/show/" + $stateParams.gameName
-	}).then(successRes => {
+	}).then(function (successRes) {
 		if (successRes.status != 200) {
 			// Game not found
-			$scope.gameNotFound = true;
+			$scope.gameFound = false;
 			return;
 		}
+		$scope.gameFound = true;
 		$scope.gameinfo = successRes.data;
+		$scope.gameinfo.joinGameFormTemplate = $sce.trustAsHtml($scope.gameinfo.joinGameFormTemplate);
 		$scope.$parent.backgroundImageUrl = $scope.gameinfo.wallpaperUrl;
-	}, errRes => {
+	}, function (errRes) {
 		// Error occured
-	});
+	});	
+
+	$scope.joinGameFormSubmitted = function () {
+		$http({
+			method: "POST",
+			url: "/spa/games/joinGame/" + $stateParams.gameName,
+			data: $scope.joinGameParameters
+		})
+		.then(function(res) {
+			$scope.lastResult = res;
+			if (res.status == 409) {
+				if (res.data == "userHasNotPerformedAction") {
+					//alert("Het valideren is mislukt, weet je zeker dat je de stappen hebt gevolgd?");
+					return;
+				}
+				if (res.data == "reload") {
+					location.reload();	
+				}
+				return;
+			}
+
+			console.log(res);
+		})
+		.catch(function(res) {
+			$scope.lastResult = res;
+		});
+		return false;
+	};
 }]);
 
 app.controller("MyGamesController", ["$scope", "$state", function($scope, $state) {

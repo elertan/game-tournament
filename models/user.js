@@ -12,6 +12,7 @@ const schema = new Schema({
 	hobby: String,
 	jwt: String,
 	priveleges: [String],
+	gameExtensionData: Object,
 	updated_at: Date,
 	created_at: Date
 });

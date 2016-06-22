@@ -1,5 +1,3 @@
-"use strict";
-
 const co = require("co");
 const express = require("express");
 const router = express.Router();
@@ -39,6 +37,31 @@ router.get("/show/:gameName", isAuth, (req, res) => {
 	}
 	res.status(404);
 	res.end();
+});
+
+router.post("/joinGame/:gameName", isAuth, (req, res) => {
+	co(function* () {
+		for (var i = 0; i < ge.extensions.length; i++) {
+			var extension = ge.extensions[i];
+			if (extension.shortname == req.params.gameName) {
+				// Use the extension here
+				const result = yield extension.joinGameSubmit(req.body);
+
+				req.user._doc.gameExtensionData = result;
+				req.user.save(() => {
+					res.json({ success: true });
+					res.end();
+				});
+				return;
+			}
+		}
+		// res.status(404);
+		// res.end();
+	}).catch(err => {
+		res.status(409)
+		res.json(err);
+		res.end();
+	});
 });
 
 module.exports = router;

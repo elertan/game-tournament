@@ -7,7 +7,7 @@ div(ng-controller="Main")
 					span.icon-bar
 					span.icon-bar
 					span.icon-bar
-				a.navbar-brand(ui-sref="index" style="margin-left: -130;") Game Tournament
+				a.navbar-brand(ui-sref="index") Game Tournament
 			div#navbar.navbar-collapse.collapse
 				ul.nav.navbar-nav
 					li.active
@@ -31,7 +31,7 @@ div(ng-controller="Main")
 						a(ng-click="showChat()")
 							i.fa.fa-comments
 							| &nbsp;Chats
-				ul.nav.navbar-nav.navbar-right(style="margin-right: -125px;")
+				ul.nav.navbar-nav.navbar-right
 					li(ng-show="!loggedIn")
 						a(ui-sref="auth/login") Login
 					li(ng-show="!loggedIn")

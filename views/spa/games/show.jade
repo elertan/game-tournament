@@ -2,8 +2,11 @@ extends ../main.jade
 
 block content
 	div(ng-controller="GamesShowController" style="color: #fff; text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;")
-		div(ng-show="!gameNotFound")
+		div(ng-show="gameFound")
 			h1 {{ gameinfo.name }}
 			p {{ gameinfo.description }}
-		div(ng-show="gameNotFound")
+			form(ng-submit="joinGameFormSubmitted()" style="background: rgba(200, 200, 200, 0.5); border: 1px solid #EEE; border-radius: 3px; padding: 15px;")
+				div(compile="" ng-bind-html="gameinfo.joinGameFormTemplate")
+				input.btn.btn-default(type="submit" ng-show="true" style="margin-top: 10px;" value="Voeg game toe")
+		div(ng-show="!gameFound")
 			h1 Game was not found
