@@ -879,15 +879,16 @@ app.controller("GroupManage", ["$scope", "$http", "$stateParams", "$state", "Gro
 		id: $stateParams.groupId
 	}, function(group) {
 		$scope.group = group;
-		if ($scope.user.jwt == $scope.group.owner.jwt) {
+		if ($scope.user.jwt == $scope.group.owner.jwt)  {
 			$scope.isGroupOwner = true;
 		} else {
 			$state.go("groups/show", {
 				groupId: id
 			});
 		}
-
-		User.query(function(users) {
+	
+		User.query(function (users) 
+		{
 			var blockedUserArray = [];
 			blockedUserArray.push($scope.group.owner);
 			for (var i = 0; i < users.length; i++) {
@@ -929,10 +930,9 @@ app.controller("GroupManage", ["$scope", "$http", "$stateParams", "$state", "Gro
 			}, 50);
 		});
 
-		$scope.SendInvitations = function() {
+            $scope.SendInvitations = function () {
 			for (var i = 0; i < $scope.invitations.length; i++) {
 				var userId = $scope.invitations[i];
-
 				var msg = new Message();
 				msg.title = "Je hebt een groeps uitnodiging ontvangen van de groep: " + $scope.group.name;
 				msg.content = "You have been invited to " + $scope.group.name + '.\n Click the link <a href="/#/groups/show/' + $scope.group._id + '">here</a> to see the group';
