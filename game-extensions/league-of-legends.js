@@ -26,7 +26,7 @@ const apiHandler = {
 						return;
 					}
 
-					const summoner = data[name.replace(/\s+/g, '')];
+					const summoner = data[name.replace(/\s+/g, "")];
 					resolve(summoner);
 				});
 		});

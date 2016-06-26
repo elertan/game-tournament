@@ -102,9 +102,9 @@ app.factory("Socket", function() {
 	return socket;
 });
 
-app.directive('compile', function ($compile, $timeout) {
+app.directive("compile", function ($compile, $timeout) {
 	return {
-		restrict: 'A',
+		restrict: "A",
 		link: function (scope, elem, attrs) {
 			$timeout(function () {
 
